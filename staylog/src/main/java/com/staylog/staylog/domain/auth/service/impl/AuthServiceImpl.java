@@ -25,7 +25,6 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -65,6 +64,10 @@ public class AuthServiceImpl implements AuthService {
 
         // RefreshToken 발급받기
         RefreshToken refreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
+
+        // 기존 활성 토큰 모두 비활성화 (한 계정당 하나의 세션만 유지)
+        refreshTokenMapper.deleteByUserId(user.getUserId());
+        log.info("기존 활성 토큰 비활성화 완료: userId={}", user.getUserId());
 
         // RefreshToken DB 저장하기
         refreshTokenMapper.save(refreshToken);
