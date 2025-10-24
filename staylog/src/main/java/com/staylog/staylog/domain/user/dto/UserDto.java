@@ -1,37 +1,32 @@
 package com.staylog.staylog.domain.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import lombok.*;
 
+import java.time.LocalDateTime;
 
-/** 
- * 유저 정보 반환용 중첩클래스
- * **/
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class UserDto {
-
     private Long userId;
-    private String loginId;
+    private String login_id;
     private String password;
     private String nickname;
-    private String name;
     private String email;
     private String phone;
     private String profileImage;
-    private Date birthDate;
+    private String birth_date;
     private String gender;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private LocalDateTime created_at;
+    private LocalDateTime updated_at;
     private String role;
     private String status;
-    private Timestamp lastLogin;
-    private Timestamp withdrawnAt;
+    private LocalDateTime last_login;
+    private LocalDateTime withdrawn_at;
+
+
 }
