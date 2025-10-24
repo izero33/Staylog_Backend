@@ -161,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("RefreshToken이 없습니다.");
         }
 
-        // RefreshToken 유효성 검증 (인증서 확인)
+        // RefreshToken 유효성 검증 (인증서 확인하기)
         if (!jwtTokenProvider.validateToken(refreshTokenString)) {
             log.warn("AccessToken 갱신 실패: 유효하지 않은 RefreshToken");
             throw new JwtException("유효하지 않은 RefreshToken입니다.");
