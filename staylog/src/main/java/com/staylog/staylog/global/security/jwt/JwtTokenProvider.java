@@ -1,5 +1,6 @@
 package com.staylog.staylog.global.security.jwt;
 
+import com.staylog.staylog.global.security.entity.RefreshToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
@@ -67,11 +70,11 @@ public class JwtTokenProvider {
     }
 
     // RefreshToken 생성 (userId만 포함, 7일 유효)
-    public String generateRefreshToken(Long userId) {
+    public RefreshToken generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenValidity);
 
-        return Jwts.builder()
+        String tokenString = Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("type", "REFRESH")
                 .setIssuer(issuer)
@@ -79,6 +82,14 @@ public class JwtTokenProvider {
                 .setExpiration(expiryDate)
                 .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
+
+        // RefreshToken 엔티티 객체 생성 및 반환
+        LocalDateTime expiresAtLocalDateTime = new Timestamp(expiryDate.getTime()).toLocalDateTime();
+        return new RefreshToken(
+                userId,
+                tokenString,
+                expiresAtLocalDateTime
+        );
     }
 
     // 토큰에서 Claims 추출

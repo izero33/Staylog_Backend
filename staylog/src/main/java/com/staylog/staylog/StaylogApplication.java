@@ -9,5 +9,4 @@ public class StaylogApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(StaylogApplication.class, args);
 	}
-
 }
