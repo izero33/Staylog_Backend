@@ -5,10 +5,17 @@
 <mapper namespace="com.staylog.domain.user.mapper.UserMapper">
 
     <!-- userId로 유저 정보 조회 -->
-    <select id="findByUserId" parameterType="String" resultType="userDto">
+    <select id="findByLoginId" parameterType="String" resultType="userDto">
         SELECT *
         FROM users
         WHERE user_id = #{userId}
+    </select>
+
+    <!-- userId로 유저 정보 조회 -->
+    <select id="findByEmail" parameterType="String" resultType="userDto">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
     </select>
 
 </mapper>
