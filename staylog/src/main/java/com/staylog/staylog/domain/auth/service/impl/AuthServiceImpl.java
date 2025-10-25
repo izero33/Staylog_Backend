@@ -244,7 +244,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
         }
 
-        // 2. 아이디, 이메일 중복 확인 (기존 로직)
+        // 2. 아이디, 이메일 중복 확인
         if (userMapper.findByLoginId(signupRequest.getLoginId()) != null) {
             throw new DuplicateSignupException("이미 사용 중인 아이디입니다.");
         }
@@ -252,12 +252,12 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateSignupException("이미 가입된 이메일입니다.");
         }
 
-        // 3. 비밀번호 암호화 및 회원 생성 (기존 로직)
+        // 3. 비밀번호 암호화 및 회원 생성
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
         signupRequest.setPassword(encodedPassword);
         authMapper.createUser(signupRequest);
 
-        // 4. 회원가입 완료 후, 사용된 인증 정보 삭제
+        // 4. 회원가입 완료 후 사용된 인증 정보 삭제
         emailMapper.deleteVerificationByEmail(signupRequest.getEmail());
 
         return signupRequest.getUserId(); // createUser에서 PK를 받아온다

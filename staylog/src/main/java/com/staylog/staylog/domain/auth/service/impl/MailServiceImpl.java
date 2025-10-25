@@ -1,11 +1,12 @@
 package com.staylog.staylog.domain.auth.service.impl;
 
 import com.staylog.staylog.domain.auth.dto.EmailVerificationDto;
-import com.staylog.staylog.domain.auth.mapper.AuthMapper;
 import com.staylog.staylog.domain.auth.mapper.EmailMapper;
 import com.staylog.staylog.domain.auth.service.MailService;
+import com.staylog.staylog.domain.user.mapper.UserMapper;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender javaMailSender;
-    private final AuthMapper authMapper;
-    private static final String SENDER_EMAIL = "kasious84@gmail.com";
+
+    @Value("${spring.mail.username}")
+    private String senderEmail; // private.properties
+
     private final EmailMapper emailMapper;
+    private final UserMapper userMapper;
+
 
 
     /**
@@ -31,13 +36,24 @@ public class MailServiceImpl implements MailService {
     @Override
     @Transactional
     public void sendVerificationMail(String email) {
-        String code = createVerificationCode();
 
-        EmailVerificationDto verificationDto = new EmailVerificationDto();
-        verificationDto.setEmail(email);
+        // users 테이블에서 이메일 중복 확인
+        if(userMapper.findByEmail(email) != null) {
+            throw new RuntimeException("이미 가입된 이메일입니다.");
+        }
+
+        EmailVerificationDto verificationDto = emailMapper.findVerificationByEmail(email);
+
+        String code = createVerificationCode(); // 랜덤 코드
+
+        // email 테이블에 입력받은 이메일이 없다면 해당하는 새로 Dto 생성
+        if(verificationDto == null) {
+            verificationDto = new EmailVerificationDto();
+            verificationDto.setEmail(email);
+        }
         verificationDto.setVerificationCode(code);
-        verificationDto.setExpiresAt(LocalDateTime.now().plusMinutes(5)); // 5분 뒤 만료
-        verificationDto.setIsVerified("N");
+        verificationDto.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // 10분 뒤 만료
+        verificationDto.setIsVerified("N"); // 미인증 상태
 
         emailMapper.saveOrUpdateVerification(verificationDto);
 
@@ -98,7 +114,7 @@ public class MailServiceImpl implements MailService {
      */
     private MimeMessage createMail(String email, String code) throws Exception {
         MimeMessage message = javaMailSender.createMimeMessage();
-        message.setFrom(SENDER_EMAIL);
+        message.setFrom(senderEmail);
         message.setRecipients(MimeMessage.RecipientType.TO, email);
         message.setSubject("StayLog 이메일 인증");
         String body = "<h3>요청하신 인증 번호입니다.</h3><h1>" + code + "</h1><h3>감사합니다.</h3>";

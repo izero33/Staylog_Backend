@@ -1,13 +1,10 @@
 package com.staylog.staylog.domain.auth.controller;
 
 import com.staylog.staylog.domain.auth.dto.request.LoginRequest;
-import com.staylog.staylog.domain.auth.dto.request.MailCheckRequest;
-import com.staylog.staylog.domain.auth.dto.request.MailSendRequest;
 import com.staylog.staylog.domain.auth.dto.request.SignupRequest;
 import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
 import com.staylog.staylog.domain.auth.dto.response.TokenResponse;
 import com.staylog.staylog.domain.auth.service.AuthService;
-import com.staylog.staylog.domain.auth.service.MailService;
 import com.staylog.staylog.global.common.response.SuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -70,7 +67,6 @@ public class AuthController {
 //                "userId", userId));
         return ResponseEntity.ok(SuccessResponse.of("회원가입이 성공적으로 완료되었습니다.",
                 Map.of("userId", userId)));
-
     }
 }
 
