@@ -24,6 +24,9 @@ public class RoomDetailResponse {
 	private int queenBed;
 	private int kingBed;
 	
+	private String typeCode;
+	private String typeName;
+	
 	
 
 }
