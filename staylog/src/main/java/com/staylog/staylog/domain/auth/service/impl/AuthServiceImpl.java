@@ -290,36 +290,28 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public NicknameCheckedResponse nicknameDuplicateCheck(String nickname) {
         UserDto userDto = userMapper.findByNickname(nickname);
-
         boolean isDuplicate = (userDto != null);
-
         if(isDuplicate) {
             throw new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME, "중복된 닉네임입니다.");
         }
         return new NicknameCheckedResponse(nickname, isDuplicate);
     }
 
+
+    /**
+     * 아이디 중복 검사 메서드( 회원가입 용도)
+     * @author 이준혁
+     * @param loginId 유저 아이디
+     * @return loginId, 중복 여부 boolean
+     */
     public LoginIdCheckedResponse loginIdDuplicateCheck(String loginId) {
         UserDto userDto = userMapper.findByLoginId(loginId);
-
         boolean isDuplicate = (userDto != null);
-
         if(isDuplicate) {
             throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_LOGINID, "중복된 아이디입니다.");
         }
         return new LoginIdCheckedResponse(loginId, isDuplicate);
     }
 
-
-    public EmailCheckedResponse emailDuplicateCheck(String email) {
-        UserDto userDto = userMapper.findByEmail(email);
-
-        boolean isDuplicate = (userDto != null);
-
-        if(isDuplicate) {
-            throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_EMAIL, "중복된 이메일입니다.");
-        }
-        return new EmailCheckedResponse(email, isDuplicate);
-    }
 
 }

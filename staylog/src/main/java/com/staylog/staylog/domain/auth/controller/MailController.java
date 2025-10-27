@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @Tag(name = "MailController", description = "이메일 인증 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/v1")
 @Slf4j
 public class MailController {
 

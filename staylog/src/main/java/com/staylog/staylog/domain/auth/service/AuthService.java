@@ -28,5 +28,5 @@ public interface AuthService {
 
     public LoginIdCheckedResponse loginIdDuplicateCheck(String loginId);
 
-    public EmailCheckedResponse emailDuplicateCheck(String email);
+//    public EmailCheckedResponse emailDuplicateCheck(String email);
 }

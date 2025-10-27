@@ -108,12 +108,12 @@ public class AuthController {
     }
 
 
-    @Operation(summary = "이메일 중복 확인", description = "회원가입 시 이메일 중복 확인 API입니다. \n * 중복 = 409 \n * 사용 가능한 이메일 = 200")
-    @GetMapping("/user/email/{email}/duplicate")
-    public ResponseEntity<SuccessResponse<EmailCheckedResponse>> emailDuplicateCheck(@PathVariable String email) {
-        EmailCheckedResponse data = authService.emailDuplicateCheck(email);
-        String message = messageUtil.getMessage(SuccessCode.USER_EMAIL_CHECKED.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, data));
-    }
+//    @Operation(summary = "이메일 중복 확인", description = "회원가입 시 이메일 중복 확인 API입니다. \n * 중복 = 409 \n * 사용 가능한 이메일 = 200")
+//    @GetMapping("/user/email/{email}/duplicate")
+//    public ResponseEntity<SuccessResponse<EmailCheckedResponse>> emailDuplicateCheck(@PathVariable String email) {
+//        EmailCheckedResponse data = authService.emailDuplicateCheck(email);
+//        String message = messageUtil.getMessage(SuccessCode.USER_EMAIL_CHECKED.getMessageKey());
+//        return ResponseEntity.ok(SuccessResponse.of(message, data));
+//    }
 }
 
