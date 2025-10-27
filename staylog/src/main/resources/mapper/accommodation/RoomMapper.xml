@@ -2,5 +2,20 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.staylog.domain.accommodation.mapper.RoomMapper">
+<mapper namespace="com.staylog.staylog.domain.accommodation.mapper.RoomMapper">
+
+	
+	<select id="selectRoomDetailById" parameterType="long" resultType="com.staylog.staylog.domain.accommodation.dto.response.RoomDetailResponse">
+		SELECT
+		room_id AS roomId, accommodation_id AS stayId, name, rm_type AS type,
+		price, max_adult AS maxAdult , max_children AS maxChildren, max_infant AS maxInfant,
+		TO_CHAR(check_in, 'HH24:MI') AS checkIn,
+		TO_CHAR(check_out, 'HH24:MI') AS checkOut,
+		status, area, single_bed AS singleBed,
+		double_bed AS doubleBed, queen_bed AS queenBed,
+		king_bed AS kingBed
+		FROM ROOM
+		WHERE room_id = #{roomId}
+		 
+	</select>
 </mapper>
