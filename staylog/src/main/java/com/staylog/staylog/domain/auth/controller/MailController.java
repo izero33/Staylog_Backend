@@ -45,8 +45,8 @@ public class MailController {
 
         MailSendResponse data = MailSendResponse.of(mailSendRequest.getEmail(), expiresAt);
         String message = messageUtil.getMessage(SuccessCode.MAIL_SENT.getMessageKey());
-
-        return ResponseEntity.ok(SuccessResponse.of(message, data));
+        String code = SuccessCode.MAIL_SENT.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, data));
     }
 
     /**
@@ -61,12 +61,13 @@ public class MailController {
         boolean isVerified = mailService.verifyMail(mailCheckRequest.getEmail(), mailCheckRequest.getCode());
 
         if (!isVerified) {
+            ErrorCode message = ErrorCode.VERIFICATION_CODE_INVALID;
             throw new BusinessException(ErrorCode.VERIFICATION_CODE_INVALID);
         }
 
         MailCheckResponse data = MailCheckResponse.success(mailCheckRequest.getEmail());
         String message = messageUtil.getMessage(SuccessCode.MAIL_VERIFIED.getMessageKey());
-
-        return ResponseEntity.ok(SuccessResponse.of(message, data));
+        String code = SuccessCode.MAIL_VERIFIED.name();
+        return ResponseEntity.ok(SuccessResponse.of(code, message, data));
     }
 }

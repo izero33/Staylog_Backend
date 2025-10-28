@@ -52,7 +52,8 @@ public class AuthController {
 
         LoginResponse loginResponse = authService.login(loginRequest, request, response);
         String message = messageUtil.getMessage(SuccessCode.LOGIN_SUCCESS.getMessageKey());
-        SuccessResponse<LoginResponse> success = SuccessResponse.of(message, loginResponse);
+        String code = SuccessCode.LOGIN_SUCCESS.name();
+        SuccessResponse<LoginResponse> success = SuccessResponse.of(code,message, loginResponse);
         return ResponseEntity.ok(success);
 
     }
@@ -65,7 +66,8 @@ public class AuthController {
 
         authService.logout(request, response);
         String message = messageUtil.getMessage(SuccessCode.LOGOUT_SUCCESS.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, null));
+        String code = SuccessCode.LOGOUT_SUCCESS.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, null));
     }
 
     @Operation(summary = "토큰 재발급", description = "RefreshToken을 이용해서 만료된 AccessToken을 재발급합니다.")
@@ -76,7 +78,8 @@ public class AuthController {
 
         TokenResponse tokenResponse = authService.refreshAccessToken(request,response);
         String message = messageUtil.getMessage(SuccessCode.TOKEN_REFRESHED.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, tokenResponse));
+        String code = SuccessCode.TOKEN_REFRESHED.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, tokenResponse));
 
     }
 
@@ -93,7 +96,8 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<Map<String, Object>>> signup(@RequestBody SignupRequest signupRequest) {
         long userId = authService.signupUser(signupRequest);
         String message = messageUtil.getMessage(SuccessCode.SIGNUP_SUCCESS.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, Map.of("userId", userId)));
+        String code = SuccessCode.SIGNUP_SUCCESS.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, Map.of("userId", userId)));
     }
 
 
@@ -109,7 +113,8 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<NicknameCheckedResponse>> nicknameDuplicateCheck(@PathVariable String nickname) {
         NicknameCheckedResponse data = authService.nicknameDuplicateCheck(nickname);
         String message = messageUtil.getMessage(SuccessCode.USER_NICKNAME_CHECKED.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, data));
+        String code = SuccessCode.USER_NICKNAME_CHECKED.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, data));
     }
 
     /**
@@ -124,7 +129,8 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<LoginIdCheckedResponse>> loginIdDuplicateCheck(@PathVariable String loginId) {
         LoginIdCheckedResponse data = authService.loginIdDuplicateCheck(loginId);
         String message = messageUtil.getMessage(SuccessCode.USER_LOGINID_CHECKED.getMessageKey());
-        return ResponseEntity.ok(SuccessResponse.of(message, data));
+        String code = SuccessCode.USER_LOGINID_CHECKED.name();
+        return ResponseEntity.ok(SuccessResponse.of(code,message, data));
     }
 
 }
