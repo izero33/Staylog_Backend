@@ -1,4 +1,4 @@
-package com.staylog.staylog.dto;
+package com.staylog.staylog.domain.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;
