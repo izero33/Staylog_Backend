@@ -6,6 +6,7 @@ import com.staylog.staylog.domain.auth.service.MailService;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.exception.BusinessException;
+import com.staylog.staylog.global.exception.custom.DuplicateLoginIdException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class MailServiceImpl implements MailService {
 
 
     /**
-     * 인증 메일 전송 메서드
+     * 이메일 중복 체크 후 인증 메일 전송 메서드
      * @author 이준혁
      * @param email 인증을 받을 이메일 주소
      * @return 인증 코드 만료 시간
@@ -44,9 +45,10 @@ public class MailServiceImpl implements MailService {
 
         // users 테이블에서 이메일 중복 확인
         if(userMapper.findByEmail(email) != null) {
-            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+            throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다.");
         }
 
+        // 이메일 테이블의 데이터가 있는지 확인
         EmailVerificationDto verificationDto = emailMapper.findVerificationByEmail(email);
 
         String code = createVerificationCode(); // 랜덤 코드

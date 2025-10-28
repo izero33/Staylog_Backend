@@ -2,9 +2,9 @@ package com.staylog.staylog.domain.auth.controller;
 
 import com.staylog.staylog.domain.auth.dto.request.LoginRequest;
 import com.staylog.staylog.domain.auth.dto.request.SignupRequest;
-import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
-import com.staylog.staylog.domain.auth.dto.response.TokenResponse;
+import com.staylog.staylog.domain.auth.dto.response.*;
 import com.staylog.staylog.domain.auth.service.AuthService;
+import com.staylog.staylog.domain.user.service.UserService;
 import com.staylog.staylog.global.common.code.SuccessCode;
 import com.staylog.staylog.global.common.response.SuccessResponse;
 import com.staylog.staylog.global.common.util.MessageUtil;
@@ -16,10 +16,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -32,6 +29,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final MessageUtil messageUtil;
+    private final UserService userService;
 
     /**
      * 로그인/ 로그아웃/ 리프레쉬 컨트롤러
@@ -83,12 +81,51 @@ public class AuthController {
     }
 
 
-    @Operation(summary = "사용자 회원가입", description = "인증이 완료된 이메일을 이용해서 회원가입합니다. \n * userId는 제외하고 데이터를 기입해야합니다.")
+    /**
+     * 사용자 회원가입 컨트롤러 메서드
+     * 성공 시 200, 실패 시 400 응답
+     * @author 이준혁
+     * @param signupRequest 회원가입 입력폼 데이터
+     * @return userId 생성된 유저의 PK (마이페이지 이동 목적)
+     */
+    @Operation(summary = "사용자 회원가입", description = "인증이 완료된 이메일을 이용해서 회원가입합니다. \n * userId는 제외하고 데이터를 기입해야합니다. \n * role은 대문자로 'USER' 입력하세요.")
     @PostMapping("/user")
     public ResponseEntity<SuccessResponse<Map<String, Object>>> signup(@RequestBody SignupRequest signupRequest) {
         long userId = authService.signupUser(signupRequest);
         String message = messageUtil.getMessage(SuccessCode.SIGNUP_SUCCESS.getMessageKey());
         return ResponseEntity.ok(SuccessResponse.of(message, Map.of("userId", userId)));
     }
+
+
+    /**
+     * 닉네임 중복 확인 컨트롤러
+     * 성공 시 200, 중복 시 409 응답
+     * @author 이준혁
+     * @param nickname 닉네임
+     * @return NicknameCheckedResponse 닉네임, 중복 여부 boolean
+     */
+    @Operation(summary = "닉네임 중복 확인", description = "회원가입 시 닉네임 중복 확인 API입니다. \n * 중복 = 409 \n * 사용 가능한 닉네임 = 200")
+    @GetMapping("/user/nickname/{nickname}/duplicate")
+    public ResponseEntity<SuccessResponse<NicknameCheckedResponse>> nicknameDuplicateCheck(@PathVariable String nickname) {
+        NicknameCheckedResponse data = authService.nicknameDuplicateCheck(nickname);
+        String message = messageUtil.getMessage(SuccessCode.USER_NICKNAME_CHECKED.getMessageKey());
+        return ResponseEntity.ok(SuccessResponse.of(message, data));
+    }
+
+    /**
+     * 아이디 중복 확인 컨트롤러
+     * 성공 시 200, 중복 시 409 응답
+     * @author 이준혁
+     * @param loginId 아이디
+     * @return LoginIdCheckedResponse 아이디, 중복 여부 boolean
+     */
+    @Operation(summary = "아이디 중복 확인", description = "회원가입 시 아이디 중복 확인 API입니다. \n * 중복 = 409 \n * 사용 가능한 아이디 = 200")
+    @GetMapping("/user/loginId/{loginId}/duplicate")
+    public ResponseEntity<SuccessResponse<LoginIdCheckedResponse>> loginIdDuplicateCheck(@PathVariable String loginId) {
+        LoginIdCheckedResponse data = authService.loginIdDuplicateCheck(loginId);
+        String message = messageUtil.getMessage(SuccessCode.USER_LOGINID_CHECKED.getMessageKey());
+        return ResponseEntity.ok(SuccessResponse.of(message, data));
+    }
+
 }
 
