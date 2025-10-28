@@ -20,10 +20,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
+    private boolean success;
+    
     /**
      * 에러 코드 (예: INVALID_CREDENTIALS, ACCOUNT_DISABLED)
      */
-    private String errorCode;
+    private String code;
 
     /**
      * 사용자에게 표시할 에러 메시지
@@ -88,9 +90,10 @@ public class ErrorResponse {
     /**
      * 기본 에러 응답 생성
      */
-    public static ErrorResponse of(String errorCode, String message, Integer status, String path) {
+    public static ErrorResponse of(String code, String message, Integer status, String path) {
         return ErrorResponse.builder()
-                .errorCode(errorCode)
+                .success(false)
+                .code(code)
                 .message(message)
                 .status(status)
                 .path(path)
@@ -101,9 +104,10 @@ public class ErrorResponse {
     /**
      * 유효성 검증 에러 응답 생성
      */
-    public static ErrorResponse validationError(String message, List<FieldError> errors, String path) {
+    public static ErrorResponse validationError(String code,String message, List<FieldError> errors, String path) {
         return ErrorResponse.builder()
-                .errorCode("VALIDATION_FAILED")
+                .success(false)
+                .code(code)
                 .message(message)
                 .status(400)
                 .path(path)
@@ -117,7 +121,8 @@ public class ErrorResponse {
      */
     public ApiResponse<ErrorResponse> toApiResponse() {
         return ApiResponse.<ErrorResponse>builder()
-                .status("error")
+                .success(success)
+                .code(code)
                 .message(this.message)
                 .data(this)
                 .timestamp(this.timestamp)

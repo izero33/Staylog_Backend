@@ -100,7 +100,9 @@ public class AuthServiceImpl implements AuthService {
                         .lastLogin(user.getLastLogin())
                         .build())
                 .build();
-
+        log.info("AccesToken : " + loginResponse.getTokenType() + loginResponse.getAccessToken() );
+        log.info("expires : "+ loginResponse.getExpiresIn());
+        log.info("유저 정보 : " + loginResponse.getUser());
         log.info("로그인 성공: userId={}, loginId={}", user.getUserId(), user.getLoginId());
 
         return loginResponse;

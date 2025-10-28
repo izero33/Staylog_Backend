@@ -21,6 +21,7 @@ public interface AuthMapper {
 
     /**
      * 마지막 로그인 시간 업데이트
+     * @author 임채호
      * @param userId 사용자 ID
      * @param lastLogin 마지막 로그인 시간
      * @return 업데이트된 행 수
