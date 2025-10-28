@@ -24,7 +24,9 @@ public class ApiResponse<T> {
     /**
      * 응답 상태 (success, error, fail)
      */
-    private String status;
+    private boolean success;
+
+    private String code;
 
     /**
      * 응답 메시지
@@ -45,9 +47,10 @@ public class ApiResponse<T> {
     /**
      * 성공 응답 생성 (데이터 포함)
      */
-    public static <T> ApiResponse<T> success(String message, T data) {
+    public static <T> ApiResponse<T> success(String code,String message, T data) {
         return ApiResponse.<T>builder()
-                .status("success")
+                .success(true)
+                .code(code)
                 .message(message)
                 .data(data)
                 .timestamp(LocalDateTime.now())
@@ -59,7 +62,7 @@ public class ApiResponse<T> {
      */
     public static <T> ApiResponse<T> success(String message) {
         return ApiResponse.<T>builder()
-                .status("success")
+                .success(true)
                 .message(message)
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -70,7 +73,7 @@ public class ApiResponse<T> {
      */
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
-                .status("error")
+                .success(false)
                 .message(message)
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -79,9 +82,10 @@ public class ApiResponse<T> {
     /**
      * 에러 응답 생성 (데이터 포함 - 에러 상세 정보)
      */
-    public static <T> ApiResponse<T> error(String message, T data) {
+    public static <T> ApiResponse<T> error(String code, String message, T data) {
         return ApiResponse.<T>builder()
-                .status("error")
+                .success(false)
+                .code(code)
                 .message(message)
                 .data(data)
                 .timestamp(LocalDateTime.now())
@@ -91,9 +95,10 @@ public class ApiResponse<T> {
     /**
      * 실패 응답 생성 (클라이언트 입력 오류 등)
      */
-    public static <T> ApiResponse<T> fail(String message, T data) {
+    public static <T> ApiResponse<T> fail(String code,String message, T data) {
         return ApiResponse.<T>builder()
-                .status("fail")
+                .success(false)
+                .code(code)
                 .message(message)
                 .data(data)
                 .timestamp(LocalDateTime.now())

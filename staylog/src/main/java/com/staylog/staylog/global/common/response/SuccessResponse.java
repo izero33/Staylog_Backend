@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SuccessResponse<T> {
 
+    private boolean success;
+    private String code;
     /**
      * 성공 메시지
      */
@@ -36,8 +38,10 @@ public class SuccessResponse<T> {
     /**
      * 데이터 포함 성공 응답 생성
      */
-    public static <T> SuccessResponse<T> of(String message, T data) {
+    public static <T> SuccessResponse<T> of(String code, String message, T data) {
         return SuccessResponse.<T>builder()
+                .success(true)
+                .code(code)
                 .message(message)
                 .data(data)
                 .timestamp(LocalDateTime.now())
@@ -59,7 +63,8 @@ public class SuccessResponse<T> {
      */
     public ApiResponse<T> toApiResponse() {
         return ApiResponse.<T>builder()
-                .status("success")
+                .success(true)
+                .code(code)
                 .message(this.message)
                 .data(this.data)
                 .timestamp(this.timestamp)

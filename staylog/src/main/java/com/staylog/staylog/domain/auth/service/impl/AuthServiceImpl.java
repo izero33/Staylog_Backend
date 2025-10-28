@@ -3,14 +3,17 @@ package com.staylog.staylog.domain.auth.service.impl;
 import com.staylog.staylog.domain.auth.dto.EmailVerificationDto;
 import com.staylog.staylog.domain.auth.dto.request.LoginRequest;
 import com.staylog.staylog.domain.auth.dto.request.SignupRequest;
-import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
-import com.staylog.staylog.domain.auth.dto.response.TokenResponse;
+import com.staylog.staylog.domain.auth.dto.response.*;
 import com.staylog.staylog.domain.auth.mapper.AuthMapper;
 import com.staylog.staylog.domain.auth.mapper.EmailMapper;
 import com.staylog.staylog.domain.auth.service.AuthService;
 import com.staylog.staylog.domain.user.dto.UserDto;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
-import com.staylog.staylog.global.exception.custom.DuplicateSignupException;
+import com.staylog.staylog.global.common.code.ErrorCode;
+import com.staylog.staylog.global.exception.custom.DuplicateEmailException;
+import com.staylog.staylog.global.exception.custom.DuplicateLoginIdException;
+import com.staylog.staylog.global.exception.custom.DuplicateNicknameException;
+import com.staylog.staylog.global.exception.custom.UnverifiedEmailException;
 import com.staylog.staylog.global.security.entity.RefreshToken;
 import com.staylog.staylog.global.security.jwt.JwtTokenProvider;
 import com.staylog.staylog.global.security.mapper.RefreshTokenMapper;
@@ -78,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         // 유저 마지막 로그인 시간 업데이트
         LocalDateTime currentTime = LocalDateTime.now();
         authMapper.updateLastLogin(user.getUserId(), currentTime);
-        
+
         user.setLastLogin(currentTime);
 
         // 로그인 응답
@@ -97,7 +100,9 @@ public class AuthServiceImpl implements AuthService {
                         .lastLogin(user.getLastLogin())
                         .build())
                 .build();
-
+        log.info("AccesToken : " + loginResponse.getTokenType() + loginResponse.getAccessToken() );
+        log.info("expires : "+ loginResponse.getExpiresIn());
+        log.info("유저 정보 : " + loginResponse.getUser());
         log.info("로그인 성공: userId={}, loginId={}", user.getUserId(), user.getLoginId());
 
         return loginResponse;
@@ -157,9 +162,9 @@ public class AuthServiceImpl implements AuthService {
     public TokenResponse refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         log.info("AccessToken 갱신 시도");
 
-        // 쿠키에서 RefreshToken 추출하고 
+        // 쿠키에서 RefreshToken 추출하고
         String refreshTokenString = jwtTokenProvider.getRefreshTokenFromCookie(request);
-        
+
         // RefreshToken이 없으면
         if (refreshTokenString == null) {
             log.warn("AccessToken 갱신 실패: RefreshToken이 없습니다.");
@@ -232,32 +237,40 @@ public class AuthServiceImpl implements AuthService {
     /**
      * 회원가입 비즈니스 로직
      * @author 이준혁
-     * @param signupRequest
+     * @param signupRequest 입력폼 데이터 Dto
      * @return 생성된 유저의 PK
      */
     @Override
     @Transactional
     public long signupUser(SignupRequest signupRequest) {
-        // 1. 이메일 인증 여부 확인
+
+        // 이메일 중복 확인
+        if (userMapper.findByEmail(signupRequest.getEmail()) != null) {
+            throw new DuplicateEmailException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다.");
+        }
+
+        // 아이디 중복 확인
+        if (userMapper.findByLoginId(signupRequest.getLoginId()) != null) {
+            throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_LOGINID, "이미 사용 중인 아이디입니다.");
+        }
+
+        // 닉네임 중복 확인
+        if(userMapper.findByNickname(signupRequest.getNickname()) != null) {
+            throw  new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME, "이미 사용 중인 닉네임입니다.");
+        }
+
+        // 이메일 인증 여부 확인
         EmailVerificationDto verification = emailMapper.findVerificationByEmail(signupRequest.getEmail());
         if (verification == null || !"Y".equals(verification.getIsVerified())) {
-            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+            throw new UnverifiedEmailException(ErrorCode.EMAIL_NOT_VERIFIED, "이메일 인증이 완료되지 않았습니다.");
         }
 
-        // 2. 아이디, 이메일 중복 확인
-        if (userMapper.findByLoginId(signupRequest.getLoginId()) != null) {
-            throw new DuplicateSignupException("이미 사용 중인 아이디입니다.");
-        }
-        if (userMapper.findByEmail(signupRequest.getEmail()) != null) {
-            throw new DuplicateSignupException("이미 가입된 이메일입니다.");
-        }
-
-        // 3. 비밀번호 암호화 및 회원 생성
+        // 비밀번호 암호화 및 유저 생성
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
         signupRequest.setPassword(encodedPassword);
         authMapper.createUser(signupRequest);
 
-        // 4. 회원가입 완료 후 사용된 인증 정보 삭제
+        // 회원가입 완료 후 email_verification 테이블에서 사용된 인증 정보 삭제
         emailMapper.deleteVerificationByEmail(signupRequest.getEmail());
 
         return signupRequest.getUserId(); // createUser에서 PK를 받아온다
@@ -275,6 +288,42 @@ public class AuthServiceImpl implements AuthService {
             log.warn("로그인 실패: 탈퇴한 계정 - userId={}", user.getUserId());
             throw new DisabledException("탈퇴한 계정입니다.");
         }
+    }
+
+
+
+    /**
+     * 닉네임 중복 검사 메서드(회원가입 용도)
+     * 중복 시 409 응답
+     * @author 이준혁
+     * @param nickname 유저 닉네임
+     * @return nickname, 중복 여부 boolean
+     */
+    @Override
+    public NicknameCheckedResponse nicknameDuplicateCheck(String nickname) {
+        UserDto userDto = userMapper.findByNickname(nickname);
+        boolean isDuplicate = (userDto != null);
+        if(isDuplicate) {
+            throw new DuplicateNicknameException(ErrorCode.DUPLICATE_NICKNAME, "중복된 닉네임입니다.");
+        }
+        return new NicknameCheckedResponse(nickname, isDuplicate);
+    }
+
+
+    /**
+     * 아이디 중복 검사 메서드(회원가입 용도)
+     * 중복 시 409 응답
+     * @author 이준혁
+     * @param loginId 유저 아이디
+     * @return loginId, 중복 여부 boolean
+     */
+    public LoginIdCheckedResponse loginIdDuplicateCheck(String loginId) {
+        UserDto userDto = userMapper.findByLoginId(loginId);
+        boolean isDuplicate = (userDto != null);
+        if(isDuplicate) {
+            throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_LOGINID, "중복된 아이디입니다.");
+        }
+        return new LoginIdCheckedResponse(loginId, isDuplicate);
     }
 
 
