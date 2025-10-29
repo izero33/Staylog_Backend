@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: staylog
+  profiles:
+    active:
+      - dev
+    group:
+      local:
+        - common
+        - private-local
+      dev:
+        - common
+        - private-dev
