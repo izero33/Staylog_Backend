@@ -6,10 +6,15 @@ import com.staylog.staylog.domain.admin.user.dto.request.AdminUpdateStatusReques
 import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateRoleResponse;
 import com.staylog.staylog.domain.admin.user.service.AdminUserService;
+import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
 import com.staylog.staylog.domain.user.dto.UserDto;
+import com.staylog.staylog.global.common.code.SuccessCode;
+import com.staylog.staylog.global.common.response.SuccessResponse;
+import com.staylog.staylog.global.common.util.MessageUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,18 +29,25 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
+@Slf4j
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
-
+    private final MessageUtil messageUtil;
     /**
      * 전체 유저 목록
      */
     @Operation(summary = "모든 유저 목록", description = "모든 유저 목록 조회")
     @GetMapping("/admin/users")
-    public ResponseEntity<AdminGetUserDetailResponse> getAllUsers(@RequestParam(defaultValue = "1")int pageNum, AdminGetUserDetailRequest.AdminUserSearchReq req) {
+    public ResponseEntity<SuccessResponse<AdminGetUserDetailResponse>> getAllUsers(@RequestParam(defaultValue = "1")int pageNum, AdminGetUserDetailRequest.AdminUserSearchReq req) {
+        log.info("모든 유저 목록 조회 : ", req);
+        log.info("모든 유저 목록 조회 : ", req.getStatus());
+
         AdminGetUserDetailResponse response = adminUserService.getUsers(pageNum, req);
-        return ResponseEntity.ok(response);
+        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
+        String code = SuccessCode.SUCCESS.name();
+        SuccessResponse<AdminGetUserDetailResponse> success = SuccessResponse.of(code,message,response);
+        return ResponseEntity.ok(success);
     }
     /**
      * 유저 상세 조회
@@ -51,9 +63,12 @@ public class AdminUserController {
      */
     @Operation(summary = "유저 권한 변경", description = "user, vip, admin 권한 변경")
     @PatchMapping("/admin/users/{userId}/role")
-    public ResponseEntity<AdminUpdateRoleResponse> updateUserRole(@PathVariable Long userId, @RequestBody AdminUpdateRoleRequest req) {
-        AdminUpdateRoleResponse res =  adminUserService.updateUserRole(userId, req.getRole());
-        return ResponseEntity.ok(res);
+    public ResponseEntity<SuccessResponse<AdminUpdateRoleResponse>> updateUserRole(@PathVariable Long userId, @RequestBody AdminUpdateRoleRequest req) {
+        AdminUpdateRoleResponse response =  adminUserService.updateUserRole(userId, req.getRole());
+        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
+        String code = SuccessCode.SUCCESS.name();
+        SuccessResponse<AdminUpdateRoleResponse> success = SuccessResponse.of(code,message,response);
+        return ResponseEntity.ok(success);
     }
     /**
      * 유저 상태 변경 (status)
