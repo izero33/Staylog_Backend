@@ -2,8 +2,7 @@ package com.staylog.staylog.domain.auth.service;
 
 import com.staylog.staylog.domain.auth.dto.request.LoginRequest;
 import com.staylog.staylog.domain.auth.dto.request.SignupRequest;
-import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
-import com.staylog.staylog.domain.auth.dto.response.TokenResponse;
+import com.staylog.staylog.domain.auth.dto.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -23,4 +22,11 @@ public interface AuthService {
 
     // 회원가입
     public long signupUser(SignupRequest signupRequest);
+
+
+    public NicknameCheckedResponse nicknameDuplicateCheck(String nickname);
+
+    public LoginIdCheckedResponse loginIdDuplicateCheck(String loginId);
+
+//    public EmailCheckedResponse emailDuplicateCheck(String email);
 }

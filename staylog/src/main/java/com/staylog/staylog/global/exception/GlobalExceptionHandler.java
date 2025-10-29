@@ -3,7 +3,10 @@ package com.staylog.staylog.global.exception;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.common.response.ErrorResponse;
 import com.staylog.staylog.global.common.util.MessageUtil;
-import com.staylog.staylog.global.exception.custom.DuplicateSignupException;
+import com.staylog.staylog.global.exception.custom.DuplicateLoginIdException;
+import com.staylog.staylog.global.exception.custom.DuplicateNicknameException;
+import com.staylog.staylog.global.exception.custom.DuplicateEmailException;
+import com.staylog.staylog.global.exception.custom.UnverifiedEmailException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +37,7 @@ public class GlobalExceptionHandler {
         log.warn("비즈니스 예외 발생 - Code: {}, Message: {}", errorCode.getCode(), message);
 
         ErrorResponse response = ErrorResponse.builder()
-                .errorCode(errorCode.getCode())
+                .code(errorCode.getCode())
                 .message(message)
                 .status(errorCode.getStatus().value())
                 .path(request.getRequestURI())
@@ -49,20 +52,65 @@ public class GlobalExceptionHandler {
      * @auther 이준혁
      * modify 임채호
      */
-    @ExceptionHandler(DuplicateSignupException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateLoginIdException(DuplicateSignupException de,
+    @ExceptionHandler(DuplicateLoginIdException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateLoginIdException(DuplicateLoginIdException de,
                                                                          HttpServletRequest request) {
-        String message = messageUtil.getMessage(ErrorCode.DUPLICATE_EMAIL.getMessageKey());
+        String message = messageUtil.getMessage(ErrorCode.DUPLICATE_LOGINID.getMessageKey());
 
         ErrorResponse response = ErrorResponse.builder()
-                .errorCode(ErrorCode.DUPLICATE_EMAIL.getCode())
+                .code(ErrorCode.DUPLICATE_LOGINID.getCode())
                 .message(message)
                 .status(HttpStatus.CONFLICT.value())
                 .path(request.getRequestURI())
                 .method(request.getMethod())
                 .build();
-
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException de,
+                                                                         HttpServletRequest request) {
+        String message = messageUtil.getMessage(ErrorCode.DUPLICATE_EMAIL.getMessageKey());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ErrorCode.DUPLICATE_EMAIL.getCode())
+                .message(message)
+                .status(HttpStatus.CONFLICT.value())
+                .path(request.getRequestURI())
+                .method(request.getMethod())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DuplicateNicknameException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateNicknameException(DuplicateNicknameException de,
+                                                                         HttpServletRequest request) {
+        String message = messageUtil.getMessage(ErrorCode.DUPLICATE_NICKNAME.getMessageKey());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ErrorCode.DUPLICATE_NICKNAME.getCode())
+                .message(message)
+                .status(HttpStatus.CONFLICT.value())
+                .path(request.getRequestURI())
+                .method(request.getMethod())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UnverifiedEmailException.class)
+    public ResponseEntity<ErrorResponse> handleUnverifiedEmailException(UnverifiedEmailException ue,
+                                                                          HttpServletRequest request) {
+        String message = messageUtil.getMessage(ErrorCode.EMAIL_NOT_VERIFIED.getMessageKey());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ErrorCode.EMAIL_NOT_VERIFIED.getCode())
+                .message(message)
+                .status(HttpStatus.FORBIDDEN.value())
+                .path(request.getRequestURI())
+                .method(request.getMethod())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -72,7 +120,7 @@ public class GlobalExceptionHandler {
         String message = messageUtil.getMessage(ErrorCode.INVALID_CREDENTIALS.getMessageKey());
 
         ErrorResponse error = ErrorResponse.builder()
-                .errorCode(ErrorCode.INVALID_CREDENTIALS.getCode())
+                .code(ErrorCode.INVALID_CREDENTIALS.getCode())
                 .message(message)
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(request.getRequestURI())
@@ -89,7 +137,7 @@ public class GlobalExceptionHandler {
         String message = messageUtil.getMessage(ErrorCode.ACCOUNT_DISABLED.getMessageKey());
 
         ErrorResponse error = ErrorResponse.builder()
-                .errorCode(ErrorCode.ACCOUNT_DISABLED.getCode())
+                .code(ErrorCode.ACCOUNT_DISABLED.getCode())
                 .message(message)
                 .status(HttpStatus.FORBIDDEN.value())
                 .path(request.getRequestURI())
@@ -106,7 +154,7 @@ public class GlobalExceptionHandler {
         String message = messageUtil.getMessage(ErrorCode.INVALID_TOKEN.getMessageKey());
 
         ErrorResponse error = ErrorResponse.builder()
-                .errorCode(ErrorCode.INVALID_TOKEN.getCode())
+                .code(ErrorCode.INVALID_TOKEN.getCode())
                 .message(message)
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(request.getRequestURI())
@@ -123,7 +171,7 @@ public class GlobalExceptionHandler {
         String message = messageUtil.getMessage(ErrorCode.INTERNAL_SERVER_ERROR.getMessageKey());
 
         ErrorResponse error = ErrorResponse.builder()
-                .errorCode(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
+                .code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
                 .message(message)
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .path(request.getRequestURI())
