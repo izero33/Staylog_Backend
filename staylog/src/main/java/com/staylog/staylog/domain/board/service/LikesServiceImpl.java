@@ -2,7 +2,6 @@ package com.staylog.staylog.domain.board.service;
 
 
 import com.staylog.staylog.domain.board.dto.LikesDto;
-import com.staylog.staylog.domain.board.repository.LikesDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
