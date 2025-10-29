@@ -1,7 +1,9 @@
 package com.staylog.staylog.domain.board.controller;
 
 import com.staylog.staylog.domain.board.dto.BoardDto;
+import com.staylog.staylog.domain.board.dto.response.BoardListResponse;
 import com.staylog.staylog.domain.board.service.BoardService;
+import com.staylog.staylog.global.common.dto.PageRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +22,14 @@ public class BoardController {
 
     // 게시판 카테고리별 목록 조회
     @GetMapping("/board/list")
-    public List<BoardDto> list(@RequestParam String boardType){
+    public BoardListResponse list(@RequestParam String boardType,
+                                  @RequestParam PageRequest request){
 
-        //boardListResponse
-        //pagination 필요
 
-        return service.getByBoardType(boardType);
+        request.setBoardType(boardType);
+
+
+        return service.getByBoardType(boardType, request);
     }
 
 

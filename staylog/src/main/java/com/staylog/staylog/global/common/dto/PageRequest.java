@@ -24,7 +24,7 @@ public class PageRequest {
     private String search;      // 검색 조건 ('title', 'content'...)
 
     // DB 쿼리용 offset
-    public int getoffset(){
+    public int getOffset(){
         return (pageNum -1)*pageSize;
     }
 }
