@@ -4,8 +4,12 @@ import com.staylog.staylog.domain.auth.dto.EmailVerificationDto;
 import com.staylog.staylog.domain.auth.mapper.EmailMapper;
 import com.staylog.staylog.domain.auth.service.MailService;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
+import com.staylog.staylog.global.common.code.ErrorCode;
+import com.staylog.staylog.global.exception.BusinessException;
+import com.staylog.staylog.global.exception.custom.DuplicateLoginIdException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
@@ -29,19 +34,21 @@ public class MailServiceImpl implements MailService {
 
 
     /**
-     * 인증 메일 전송 메서드
+     * 이메일 중복 체크 후 인증 메일 전송 메서드
      * @author 이준혁
      * @param email 인증을 받을 이메일 주소
+     * @return 인증 코드 만료 시간
      */
     @Override
     @Transactional
-    public void sendVerificationMail(String email) {
+    public LocalDateTime sendVerificationMail(String email) {
 
         // users 테이블에서 이메일 중복 확인
         if(userMapper.findByEmail(email) != null) {
-            throw new RuntimeException("이미 가입된 이메일입니다.");
+            throw new DuplicateLoginIdException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다.");
         }
 
+        // 이메일 테이블의 데이터가 있는지 확인
         EmailVerificationDto verificationDto = emailMapper.findVerificationByEmail(email);
 
         String code = createVerificationCode(); // 랜덤 코드
@@ -52,7 +59,8 @@ public class MailServiceImpl implements MailService {
             verificationDto.setEmail(email);
         }
         verificationDto.setVerificationCode(code);
-        verificationDto.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // 10분 뒤 만료
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10); // 10분 뒤 만료
+        verificationDto.setExpiresAt(expiresAt);
         verificationDto.setIsVerified("N"); // 미인증 상태
 
         emailMapper.saveOrUpdateVerification(verificationDto);
@@ -60,9 +68,12 @@ public class MailServiceImpl implements MailService {
         try {
             MimeMessage message = createMail(email, code);
             javaMailSender.send(message);
+            log.info("인증 메일 발송 완료: {}", email);
+            log.info("인증 코드 번호: {}", code);
+            return expiresAt;
         } catch (Exception e) {
-            // 실무에서는 Log.error()를 사용해 에러 로깅을 해야함
-            throw new RuntimeException("메일 발송 중 오류가 발생했습니다.", e);
+            log.error("메일 발송 중 오류 발생: {}", email, e);
+            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED, e);
         }
     }
 
