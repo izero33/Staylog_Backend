@@ -1,0 +1,26 @@
+server:
+  port: ${SERVER_PORT:9000}
+# =====================================
+# Oracle Database Connection Settings
+# =====================================
+spring:
+  datasource:
+    driver-class-name: ${DB_DRIVER}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PW}
+# =====================================
+# Email 인증
+# 이메일, 시크릿 키
+# =====================================
+  mail: 
+    username: ${MAIL_USER}
+    password: ${MAIL_PW}
+
+
+# =====================================
+# JWT Token Settings
+# JWT secret key
+# =====================================
+jwt:
+  secret: ${JWT_SECRET}
