@@ -1,7 +1,9 @@
 package com.staylog.staylog.domain.admin.user.service.impl;
 
 
-import com.staylog.staylog.domain.admin.user.dto.request.AdminGetUserDetailRequest;
+import com.staylog.staylog.domain.admin.user.dto.AdminUserDetailDto;
+import com.staylog.staylog.domain.admin.user.dto.AdminUserListDto;
+import com.staylog.staylog.domain.admin.user.dto.request.AdminUserListRequest;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateRoleResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateStatusResponse;
@@ -21,7 +23,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
     @Override
-    public AdminGetUserDetailResponse getUsers(int pageNum, AdminGetUserDetailRequest.AdminUserSearchReq req) {
+    public AdminGetUserDetailResponse getUsers(int pageNum, AdminUserListRequest req) {
 
         final int PAGE_ROW_COUNT = 5;     // 한 페이지에 보여줄 행 수
         final int PAGE_DISPLAY_COUNT = 10; // 하단에 보여줄 페이지 버튼 수
@@ -50,7 +52,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         int nextNum = (endPageNum < totalPageCount) ? (endPageNum + 1) : 0;
 
 
-        List<UserDto> users = adminUserMapper.findUsers(req);
+        List<AdminUserListDto> users = adminUserMapper.findUsers(req);
 
 
         AdminGetUserDetailResponse resp = new AdminGetUserDetailResponse();
@@ -66,7 +68,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public UserDto getUserDetail(Long userId) {
+    public AdminUserDetailDto getUserDetail(Long userId) {
         return adminUserMapper.getUserDetail(userId);
     }
 
@@ -74,7 +76,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     public AdminUpdateRoleResponse updateUserRole(Long userId, String role) {
         adminUserMapper.updateUserRole(userId, role);
 
-        UserDto user = adminUserMapper.getUserDetail(userId);
+        AdminUserDetailDto user = adminUserMapper.getUserDetail(userId);
         return new AdminUpdateRoleResponse(
                 user.getUserId(),
                 user.getName(),
@@ -86,7 +88,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public AdminUpdateStatusResponse updateUserStatus(Long userId, String status) {
         adminUserMapper.updateUserStatus(userId, status);
-        UserDto user = adminUserMapper.getUserDetail(userId);
+        AdminUserDetailDto user = adminUserMapper.getUserDetail(userId);
         return new AdminUpdateStatusResponse(
                 user.getUserId(),
                 user.getName(),

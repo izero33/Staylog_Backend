@@ -1,13 +1,13 @@
 package com.staylog.staylog.domain.admin.user.controller;
 
-import com.staylog.staylog.domain.admin.user.dto.request.AdminGetUserDetailRequest;
+import com.staylog.staylog.domain.admin.user.dto.AdminUserDetailDto;
+import com.staylog.staylog.domain.admin.user.dto.request.AdminUserListRequest;
 import com.staylog.staylog.domain.admin.user.dto.request.AdminUpdateRoleRequest;
 import com.staylog.staylog.domain.admin.user.dto.request.AdminUpdateStatusRequest;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateRoleResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateStatusResponse;
 import com.staylog.staylog.domain.admin.user.service.AdminUserService;
-import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
 import com.staylog.staylog.domain.user.dto.UserDto;
 import com.staylog.staylog.global.common.code.SuccessCode;
 import com.staylog.staylog.global.common.response.SuccessResponse;
@@ -40,7 +40,7 @@ public class AdminUserController {
      */
     @Operation(summary = "모든 유저 목록", description = "모든 유저 목록 조회")
     @GetMapping("/admin/users")
-    public ResponseEntity<SuccessResponse<AdminGetUserDetailResponse>> getAllUsers(@RequestParam(defaultValue = "1")int pageNum, AdminGetUserDetailRequest.AdminUserSearchReq req) {
+    public ResponseEntity<SuccessResponse<AdminGetUserDetailResponse>> getAllUsers(@RequestParam(defaultValue = "1")int pageNum, AdminUserListRequest req) {
         log.info("모든 유저 목록 조회 : ", req);
         log.info("모든 유저 목록 조회 : ", req.getStatus());
 
@@ -55,11 +55,11 @@ public class AdminUserController {
      */
     @Operation(summary = "유저 상세 조회", description = "유저의 정보 조회")
     @GetMapping("/admin/users/{userId}")
-    public ResponseEntity<SuccessResponse<UserDto>> getUserDetail(@PathVariable Long userId) {
-        UserDto user = adminUserService.getUserDetail(userId);
+    public ResponseEntity<SuccessResponse<AdminUserDetailDto>> getUserDetail(@PathVariable Long userId) {
+        AdminUserDetailDto user = adminUserService.getUserDetail(userId);
         String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
         String code = SuccessCode.SUCCESS.name();
-        SuccessResponse<UserDto> success = SuccessResponse.of(code,message,user);
+        SuccessResponse<AdminUserDetailDto> success = SuccessResponse.of(code,message,user);
         return ResponseEntity.ok(success);
     }
     /**
