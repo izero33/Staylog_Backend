@@ -30,7 +30,6 @@ public class NotificationController {
 
     /**
      * 유저 한명의 알림 리스트 조회
-     *
      * @author 이준혁
      * @param userId 유저 PK
      * @return List<NotificationResponse>
@@ -43,8 +42,24 @@ public class NotificationController {
         String message = messageUtil.getMessage(SuccessCode.NOTIFICATION_LIST_FIND.getMessageKey());
         String code = SuccessCode.NOTIFICATION_LIST_FIND.name();
         return ResponseEntity.ok(SuccessResponse.of(code, message, notiList));
-
     }
+
+    
+    /**
+     * 알림 삭제
+     * @author 이준혁
+     * @param notiId 알림 PK
+     */
+    @Operation(summary = "알림 삭제", description = "알림을 삭제합니다.")
+    @GetMapping("/notification/{notiId}/delete")
+    public ResponseEntity<SuccessResponse<Void>> deleteNotification(long notiId) {
+        notificationService.deleteNotification(notiId);
+
+        String message = messageUtil.getMessage(SuccessCode.NOTIFICATION_DELETE.getMessageKey());
+        String code = SuccessCode.NOTIFICATION_DELETE.name();
+        return ResponseEntity.ok(SuccessResponse.of(code, message, null));
+    }
+
 
 
 }

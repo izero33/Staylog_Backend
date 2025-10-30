@@ -24,4 +24,14 @@ public interface NotificationMapper {
      * @return NotificationResponse
      */
     public List<NotificationResponse> findNotificationsByUserId(long userId);
+
+
+
+    /**
+     * 알림 삭제
+     * @author 이준혁
+     * @param notiId 알림 PK
+     * @return 성공 여부 1 또는 0
+     */
+    public int deleteByNotiId(long notiId);
 }

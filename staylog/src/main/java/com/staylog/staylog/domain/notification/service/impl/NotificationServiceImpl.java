@@ -22,7 +22,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     /**
      * 알림 데이터 저장
-     *
      * @author 이준혁
      * @param notificationRequest 알림 정보
      */
@@ -38,7 +37,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     /**
      * 유저 한명의 알림 리스트 조회
-     *
      * @author 이준혁
      * @param userId 유저 PK
      * @return List<NotificationResponse>
@@ -49,9 +47,25 @@ public class NotificationServiceImpl implements NotificationService {
         List<NotificationResponse> notiList = notificationMapper.findNotificationsByUserId(userId);
 
         if(notiList == null) {
-            log.warn("알림 데이터 조회 실패: 알림 정보를 찾을 수 없음 - userId={}", userId);
+            log.warn("알림 데이터 조회 실패: 알림 정보를 찾을 수 없습니다. - userId={}", userId);
             throw new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND);
         }
         return notiList;
+    }
+
+
+    /**
+     * 알림 삭제
+     * @param notiId 알림 PK
+     * @author 이준혁
+     */
+    @Override
+    public void deleteNotification(long notiId) {
+        int isSuccess = notificationMapper.deleteByNotiId(notiId);
+
+        if(isSuccess == 0) {
+            log.warn("알림 데이터 삭제 실패: 알림 정보를 찾을 수 없습니다. - notiId={}", notiId);
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
     }
 }

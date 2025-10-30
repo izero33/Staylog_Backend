@@ -15,6 +15,7 @@ public interface NotificationService {
      */
     public void createNotification(NotificationRequest notificationRequest);
 
+
     /**
      * 유저 한명의 알림 리스트 조회
      * @author 이준혁
@@ -22,4 +23,12 @@ public interface NotificationService {
      * @return List<NotificationResponse>
      */
     public List<NotificationResponse> getNotificationList(long userId);
+
+
+    /**
+     * 알림 삭제
+     * @author 이준혁
+     * @param notiId 알림 PK
+     */
+    public void deleteNotification(long notiId);
 }

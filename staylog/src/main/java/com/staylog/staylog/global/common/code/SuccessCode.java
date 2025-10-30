@@ -61,7 +61,8 @@ public enum SuccessCode {
 
     // ==================== 알림 관련 성공 (9xxx) ====================
     NOTIFICATION_CREATE(201, "S9001", "success.notification.created"),
-    NOTIFICATION_LIST_FIND(200, "S9002", "success.notification.list.find");
+    NOTIFICATION_LIST_FIND(200, "S9002", "success.notification.list.find"),
+    NOTIFICATION_DELETE(200, "S9003", "success.notification.delete");
 
     private final int httpStatus;
     private final String code;

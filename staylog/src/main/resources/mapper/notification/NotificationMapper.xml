@@ -23,4 +23,10 @@
         ORDER BY created_at DESC
     </select>
 
+    <!-- 알림 데이터 삭제 -->
+    <delete id="deleteByNotiId" parameterType="long">
+        DELETE FROM notification
+        WHERE noti_id = #{notiId}
+    </delete>
+
 </mapper>
