@@ -5,6 +5,7 @@ import com.staylog.staylog.domain.admin.user.dto.request.AdminUpdateRoleRequest;
 import com.staylog.staylog.domain.admin.user.dto.request.AdminUpdateStatusRequest;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateRoleResponse;
+import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateStatusResponse;
 import com.staylog.staylog.domain.admin.user.service.AdminUserService;
 import com.staylog.staylog.domain.auth.dto.response.LoginResponse;
 import com.staylog.staylog.domain.user.dto.UserDto;
@@ -54,9 +55,12 @@ public class AdminUserController {
      */
     @Operation(summary = "유저 상세 조회", description = "유저의 정보 조회")
     @GetMapping("/admin/users/{userId}")
-    public ResponseEntity<UserDto> getUserDetail(@PathVariable Long userId) {
+    public ResponseEntity<SuccessResponse<UserDto>> getUserDetail(@PathVariable Long userId) {
         UserDto user = adminUserService.getUserDetail(userId);
-        return ResponseEntity.ok(user);
+        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
+        String code = SuccessCode.SUCCESS.name();
+        SuccessResponse<UserDto> success = SuccessResponse.of(code,message,user);
+        return ResponseEntity.ok(success);
     }
     /**
      * 유저 권한 변경 (role)
@@ -75,8 +79,11 @@ public class AdminUserController {
      */
     @Operation(summary = "유저 상태 변경", description = "활성화, 비활성화 상태 변경")
     @PatchMapping("/admin/users/{userId}/status")
-    public ResponseEntity<Void> updateUserStatus(@PathVariable Long userId, @RequestBody AdminUpdateStatusRequest req) {
-        adminUserService.updateUserStatus(userId, req.getStatus());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SuccessResponse<AdminUpdateStatusResponse>> updateUserStatus(@PathVariable Long userId, @RequestBody AdminUpdateStatusRequest req) {
+        AdminUpdateStatusResponse response =  adminUserService.updateUserStatus(userId, req.getStatus());
+        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
+        String code = SuccessCode.SUCCESS.name();
+        SuccessResponse<AdminUpdateStatusResponse> success = SuccessResponse.of(code,message,response);
+        return ResponseEntity.ok(success);
     }
 }

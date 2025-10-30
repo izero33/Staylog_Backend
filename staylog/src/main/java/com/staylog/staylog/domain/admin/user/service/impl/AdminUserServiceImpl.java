@@ -4,6 +4,7 @@ package com.staylog.staylog.domain.admin.user.service.impl;
 import com.staylog.staylog.domain.admin.user.dto.request.AdminGetUserDetailRequest;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateRoleResponse;
+import com.staylog.staylog.domain.admin.user.dto.response.AdminUpdateStatusResponse;
 import com.staylog.staylog.domain.admin.user.mapper.AdminUserMapper;
 import com.staylog.staylog.domain.admin.user.service.AdminUserService;
 import com.staylog.staylog.domain.user.dto.UserDto;
@@ -83,7 +84,14 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public void updateUserStatus(Long userId, String status) {
+    public AdminUpdateStatusResponse updateUserStatus(Long userId, String status) {
         adminUserMapper.updateUserStatus(userId, status);
+        UserDto user = adminUserMapper.getUserDetail(userId);
+        return new AdminUpdateStatusResponse(
+                user.getUserId(),
+                user.getName(),
+                user.getStatus(),
+                user.getUpdatedAt()
+        );
     }
 }
