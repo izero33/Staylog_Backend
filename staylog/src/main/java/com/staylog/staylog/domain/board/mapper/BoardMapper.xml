@@ -5,15 +5,31 @@
 <mapper namespace="com.staylog.staylog.domain.board.mapper.BoardMapper">
 
 
-
+    <!--  해당 카테고리 전체 게시글 수  -->
+    <select id="countByBoardType" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM board
+        WHERE board_type = #{boardType}
+            AND deleted = 'N'
+    </select>
     
     <!-- 해당 카테고리 게시판 목록 조회 (삭제된 게시글 제외) -->
     <select id="getByBoardType" parameterType="string" resultType="BoardDto">
         SELECT board_id, accommodation_id, booking_id user_id, region_type, board_type,
             title, likes_count, rating, views_count, created_at, updated_at, deleted
         FROM board
-        WHERE board_type = #{board_type}
+        WHERE board_type = #{boardType}
             AND deleted = 'N'
+        ORDER BY created_at DESC
+    </select>
+
+
+    <!-- 해당 카테고리 게시글 상세 조회 -->
+    <select id="getByBoardId" parameterType="long" resultType="BoardDto">
+        SELECT board_id, accommodation_id, booking_id user_id, region_type, board_type,
+        title, likes_count, rating, views_count, created_at, updated_at, deleted
+        FROM board
+        WHERE board_id = #{boardId}
         ORDER BY created_at DESC
     </select>
         
@@ -24,16 +40,16 @@
             content = #{content},
             rating = #{rating},
             updated_at = SYSDATE
-        WHERE board_id = #{board_id}
+        WHERE board_id = #{boardId}
 
     </update>
     
     <!-- 게시글 삭제 (논리 삭제) -->
-    <update id="delete" parameterType="boardDto">
+    <update id="delete" parameterType="long">
         UPDATE board
         SET deleted = 'Y',
             updated_at = SYSDATE
-        WHERE board_id = #{board_id}
+        WHERE board_id = #{boardId}
     </update>
     
     <!-- 게시글 등록 -->
@@ -45,7 +61,7 @@
         (board_id, accommodation_id, booking_id, user_id, region_type, board_type,
             title, content, rating)
         VALUES (
-            #{board_id}, #{accommodation_id}, #{booking_id}, #{user_id}, #{region_type}, #{board_type},
+            #{boardId}, #{accommodationId}, #{bookingId}, #{userId}, #{regionType}, #{boardType},
             #{title}, #{content}, #{rating})
 
     </insert>

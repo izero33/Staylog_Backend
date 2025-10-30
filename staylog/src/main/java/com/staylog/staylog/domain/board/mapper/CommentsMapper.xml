@@ -10,7 +10,7 @@
     <select id="selectAll" resultType="commentsDto">
         SELECT comment_id, board_id, user_id, parent_id, content, created_at, updated_at, deleted
         FROM comments
-        WHERE board_id = #{board_id}
+        WHERE board_id = #{boardId}
             AND deleted = 'N'
         ORDER BY created_at DESCs
     </select>
@@ -21,7 +21,7 @@
         UPDATE comments
         SET content = #{content},
         updated_at = SYSDATE
-        WHERE comment_id = #{comment_id}
+        WHERE comment_id = #{commentId}
     </update>
     
     
@@ -30,7 +30,7 @@
         UPDATE comments
         SET updated_at = SYSDATE,
         deleted = 'Y'
-        WHERE comment_id = #{comment_id}
+        WHERE comment_id = #{commentId}
     </delete>
     
     <!--  댓글 등록  -->
@@ -38,8 +38,8 @@
         INSERT INTO comments
         (comment_id, board_type, board_id, user_id, parent_id, content, created_at, deleted)
         VALUES (
-            #{comment_id}, #{board_type}, #{board_id},
-            #{user_id}, #{parent_id}, #{content}, SYSDATE, 'N'
+            #{commentId}, #{boardType}, #{boardId},
+            #{userId}, #{parentId}, #{content}, SYSDATE, 'N'
         )
     </insert>
 
