@@ -30,6 +30,19 @@ public class SearchController {
             @ModelAttribute AccomListRequest request) {
         
         List<AccomListResponse> accomListResponse = searchMapper.getAccomList(request);
+
+        log.info("조건에 따른 예약 가능한 객실을 가진 숙소 리스트 조회 개수: {}", accomListResponse.size());
+
+        // 개별 숙소 정보 상세 로그
+        for (AccomListResponse accom : accomListResponse) {
+            log.info("숙소 ID: {}", accom.getAccommodationId());
+            log.info("이름: {}",  accom.getAccommodationName());
+            log.info("지역: {}", accom.getRegionName());
+            log.info("최대 인원 수 : {}", accom.getMaxCapacity());
+            log.info("최저가: {}", accom.getBasePrice());
+            log.info("예약 수 (인기순 정렬용): {}", accom.getReservationCount());
+        }
+        
         String code = SuccessCode.SUCCESS.name();
         String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
         SuccessResponse<List<AccomListResponse>> success = SuccessResponse.of(code, message, accomListResponse);
