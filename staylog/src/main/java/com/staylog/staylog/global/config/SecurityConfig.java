@@ -4,6 +4,7 @@ import com.staylog.staylog.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -67,7 +68,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",        // Swagger API Docs
                                 "/**"
                         ).permitAll()
-
+                		.requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
