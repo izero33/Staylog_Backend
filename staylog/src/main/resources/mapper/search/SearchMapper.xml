@@ -19,24 +19,26 @@
     </resultMap>
 
     <select id="getAccomList" resultMap="AccomWithImagesMap">
+        SELECT *
+        FROM (
         SELECT
-            A.ACCOMMODATION_ID,
-            A.NAME AS ACCOMMODATION_NAME,
-            C.CODE_NAME AS REGION_NAME,
-            MIN(R.MAX_ADULT + R.MAX_CHILDREN + R.MAX_INFANT) AS MIN_CAPACITY,
-            MAX(R.MAX_ADULT + R.MAX_CHILDREN + R.MAX_INFANT) AS MAX_CAPACITY,
-            MIN(R.PRICE) AS BASE_PRICE,
-            NVL(COUNT(DISTINCT RS.BOOKING_ID), 0) AS RES_COUNT,
-            I.FILE_SAVED_NAME AS IMG_URL,
-            A.CREATED_AT
+        A.ACCOMMODATION_ID,
+        A.NAME AS ACCOMMODATION_NAME,
+        C.CODE_NAME AS REGION_NAME,
+        2 AS MIN_CAPACITY,
+        MAX(R.MAX_ADULT + R.MAX_CHILDREN + R.MAX_INFANT) AS MAX_CAPACITY,
+        MIN(R.PRICE) AS BASE_PRICE,
+        NVL(COUNT(DISTINCT RS.BOOKING_ID), 0) AS RES_COUNT,
+        I.FILE_SAVED_NAME AS IMG_URL,
+        A.CREATED_AT
         FROM ACCOMMODATION A
         JOIN ROOM R ON A.ACCOMMODATION_ID = R.ACCOMMODATION_ID AND R.DELETED_YN = 'N'
         JOIN COMMON_CODE C ON A.REGION_CODE = C.CODE_ID AND C.USE_YN = 'Y'
         LEFT JOIN IMAGE_FILE I ON I.TARGET_ID = A.ACCOMMODATION_ID
-            AND I.TARGET_TYPE = 'ACCOM'
-            AND I.IMAGE_TYPE = 'IMG_ORIGINAL'
+        AND I.TARGET_TYPE = 'ACCOM'
+        AND I.IMAGE_TYPE = 'IMG_ORIGINAL'
         LEFT JOIN RESERVATION RS ON RS.ROOM_ID = R.ROOM_ID
-            AND RS.STATUS IN ('CONFIRMED', 'PENDING')
+        AND RS.STATUS IN ('CONFIRMED', 'PENDING')
         <where>
             A.DELETED_YN = 'N'
             <if test="regionCodes != null and !regionCodes.isEmpty()">
@@ -50,11 +52,11 @@
             </if>
             <if test="checkIn != null and checkOut != null">
                 AND NOT EXISTS (
-                    SELECT 1
-                    FROM RESERVATION X
-                    WHERE X.ROOM_ID = R.ROOM_ID
-                    AND X.STATUS IN ('CONFIRMED', 'PENDING')
-                    AND (X.CHECK_IN <![CDATA[<]]> #{checkOut} AND X.CHECK_OUT > #{checkIn})
+                SELECT 1
+                FROM RESERVATION X
+                WHERE X.ROOM_ID = R.ROOM_ID
+                AND X.STATUS IN ('CONFIRMED', 'PENDING')
+                AND (X.CHECK_IN <![CDATA[<]]> #{checkOut} AND X.CHECK_OUT > #{checkIn})
                 )
             </if>
             <if test="lastAccomId != null">
@@ -79,7 +81,9 @@
                 ORDER BY A.NAME ASC, A.ACCOMMODATION_ID ASC
             </otherwise>
         </choose>
-        FETCH FIRST 20 ROWS ONLY
+        )
+        WHERE ROWNUM <![CDATA[<=]]> 20
     </select>
+
 
 </mapper>
