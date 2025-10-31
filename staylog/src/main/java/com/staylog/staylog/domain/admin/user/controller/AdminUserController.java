@@ -52,6 +52,7 @@ public class AdminUserController {
     /**
      * 유저 상세 조회
      */
+
     @Operation(summary = "유저 상세 조회", description = "유저의 정보 조회")
     @GetMapping("/admin/users/{userId}")
     public ResponseEntity<UserDto> getUserDetail(@PathVariable Long userId) {
