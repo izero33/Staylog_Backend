@@ -21,7 +21,7 @@ public class BoardController {
     private final BoardService service;
 
     // 게시판 카테고리별 목록 조회
-    @GetMapping("/board/list")
+    @GetMapping("/boards/list")
     public BoardListResponse list(@RequestParam String boardType,
                                   @RequestParam PageRequest request){
 
@@ -31,6 +31,5 @@ public class BoardController {
 
         return service.getByBoardType(boardType, request);
     }
-
 
 }
