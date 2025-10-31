@@ -9,7 +9,7 @@
     <select id="countByBoardId" parameterType="long" resultType="int">
         SELECT count(*) AS likes_count
         FROM likes
-        WHERE board_id = #{board_id}
+        WHERE board_id = #{boardId}
 
     </select>
 
@@ -17,7 +17,7 @@
     <select id="selectAll" parameterType="long" resultType="likesDto">
         SELECT like_id, user_id, board_id
         FROM likes
-        WHERE board_id = #{board_id}
+        WHERE board_id = #{boardId}
         ORDER BY like_id DESC
     </select>
 
@@ -25,7 +25,7 @@
     <!--  좋아요 취소  -->
     <delete id="delete" parameterType="long">
         DELETE FROM likes
-        WHERE like_id = #{like_id}
+        WHERE like_id = #{likeId}
     </delete>
 
 
@@ -38,9 +38,9 @@
         INSERT INTO likes
         (like_id, user_id, board_id)
         VALUES (
-            #{like_id},
-            #{user_id},
-            #{board_id}
+            #{likeId},
+            #{userId},
+            #{boardId}
         )
     </insert>
 
