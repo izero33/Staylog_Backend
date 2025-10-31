@@ -1,8 +1,6 @@
 package com.staylog.staylog.domain.admin.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +8,8 @@ import java.time.LocalDateTime;
  *  유저 상세 조회 Dto
  * @author  고영석
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminUserDetailDto {

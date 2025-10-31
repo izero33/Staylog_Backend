@@ -1,23 +1,20 @@
 package com.staylog.staylog.domain.admin.booking.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 /**
  * 관리자 예약목록 응답 객체
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AdminBookingDto {
-    private Long bookingId;          // 예약 PK
+    private Long bookingId;          // 예약 ID
     private String bookingNum;       // 예약 번호
-    private String guestName;        // 예약자 이름
+    private String guestName;        // 투숙객 이름
     private String userName;         // 회원 이름 (JOIN 필요)
     private String accommodationName;// 숙소명 (JOIN 필요)
     private String roomName;         // 객실명 (JOIN 필요)

@@ -1,15 +1,12 @@
 package com.staylog.staylog.domain.admin.user.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * 유저 권한 변경을 위한 객체
  */
-@Data
-@Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminUpdateRoleRequest {

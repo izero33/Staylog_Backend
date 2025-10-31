@@ -3,13 +3,16 @@ package com.staylog.staylog.domain.admin.user.dto.response;
 import com.staylog.staylog.domain.admin.user.dto.AdminUserListDto;
 import com.staylog.staylog.domain.user.dto.UserDto;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 /**
  * 관리자 유저 목록 및 상세 조회 응답 Dto
  */
-@Data
+@Getter
+@Setter
 public class AdminGetUserDetailResponse {
     // 목록 조회용 필드
     private int totalCount;
