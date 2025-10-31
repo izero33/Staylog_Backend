@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.staylog.staylog.domain.accommodation.controller.AccommodationController;
 import com.staylog.staylog.domain.admin.accommodation.dto.request.AdminAccommodationRequest;
 import com.staylog.staylog.domain.admin.accommodation.dto.request.AdminAccommodationSearchRequest;
 import com.staylog.staylog.domain.admin.accommodation.dto.response.AdminAccommodationDetailResponse;
@@ -23,6 +24,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 관리자 숙소 관리 컨트롤러
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
  *
  * @author 천승현
  */
+@Slf4j
 @Tag(name = "AdminAccommodationController", description = "관리자 숙소 관리 API")
 @RequestMapping("/api")
 @RestController
@@ -159,9 +162,11 @@ public class AdminAccommodationController {
     public ResponseEntity<SuccessResponse<Void>> addAccommodation(
             @Parameter(description = "등록할 숙소 정보") 
             @RequestBody AdminAccommodationRequest request) {
+    	
+    	log.info("숙소등록요청 : {}", request);
         accomService.addAccommodation(request);
-        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
-        String code = SuccessCode.SUCCESS.name();
+        String message = messageUtil.getMessage(SuccessCode.ACCOMMODATION_CREATED.getMessageKey());
+        String code = SuccessCode.ACCOMMODATION_CREATED.name();
         return ResponseEntity.ok(SuccessResponse.of(code, message, null));
     }
 }

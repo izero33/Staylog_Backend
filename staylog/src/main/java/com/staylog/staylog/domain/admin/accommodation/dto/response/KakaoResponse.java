@@ -1,5 +1,4 @@
-package com.staylog.staylog.domain.accommodation.dto.response;
-
+package com.staylog.staylog.domain.admin.accommodation.dto.response;
 
 import lombok.Data;
 import lombok.Getter;
@@ -8,7 +7,7 @@ import lombok.Setter;
 import java.util.List;
 /*
  * 정나영
- * 카카오 api응답을 json을 담기 위함
+ * 카카오 api 응답을 json 에 담기 위함
  * */
 
 @Getter
