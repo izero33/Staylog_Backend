@@ -23,4 +23,7 @@ public interface AccommodationMapper {
      * @return 객실 목록 리스트
      */
     List<RoomListResponse> selectRoomList(@Param("accommodationId") Long id);
+   
+ 
+    
 }

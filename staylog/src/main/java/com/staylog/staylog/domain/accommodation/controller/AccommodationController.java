@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.staylog.staylog.domain.accommodation.dto.response.AccommodationDetailResponse;
 import com.staylog.staylog.domain.accommodation.service.AccommodationService;
+import com.staylog.staylog.global.common.util.MessageUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequestMapping("/v1")
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class AccommodationController {
 
 	// 의존 객체 생성자 주입
     private final AccommodationService service;
+	private final MessageUtil messageUtil;
     
     @GetMapping("/accommodations/{accommodationId}")
     public ResponseEntity<AccommodationDetailResponse> getAccommodationDetail(@PathVariable Long accommodationId) {
@@ -29,5 +33,15 @@ public class AccommodationController {
     
     
     // TODO: 객실 목록, 리뷰 목록 등이 추가될 예정
+    
 }
+
+
+
+
+
+
+
+
+
 
