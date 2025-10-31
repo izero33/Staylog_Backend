@@ -68,7 +68,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",        // Swagger API Docs
                                 "/**"
                         ).permitAll()
-                		.requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        
+                        /**
+                         * https 관련 문제 수정
+                         * @author 고윤제
+                         */
+                		.requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()	// 프리플라이트 통과
+                		
                         // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
