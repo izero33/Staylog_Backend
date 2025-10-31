@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,8 +48,8 @@ public class NotificationController {
      * @param notiId 알림 PK
      */
     @Operation(summary = "알림 삭제", description = "알림을 삭제합니다.")
-    @GetMapping("/notification/{notiId}/delete")
-    public ResponseEntity<SuccessResponse<Void>> deleteNotification(long notiId) {
+    @DeleteMapping("/notification/{notiId}/delete")
+    public ResponseEntity<SuccessResponse<Void>> deleteNotification(@PathVariable long notiId) {
         notificationService.deleteNotification(notiId);
 
         String message = messageUtil.getMessage(SuccessCode.NOTIFICATION_DELETE.getMessageKey());
