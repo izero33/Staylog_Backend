@@ -32,6 +32,9 @@ jobs:
       MAIL_USER: ${{ secrets.MAIL_USER }}
       MAIL_PW: ${{ secrets.MAIL_PW }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      KAKAO_MAP_KEY: ${{ secrets.KAKAO_MAP_KEY }}
+      IMAGE_LOCATION: ${{ secrets.IMAGE_LOCATION }}
+      FILE_LOCATION: ${{ secrets.FILE_LOCATION }}
 
 
     steps:
@@ -116,6 +119,8 @@ jobs:
             docker run -d --name "${{ env.CONTAINER_NAME }}" \
               --network "${{ env.NETWORK_NAME }}" \
               -p "${{ env.APP_PORT }}:${{ env.APP_PORT }}" \
+              -v /home/ec2-user/upload/images:/usr/upload/images \
+              -v /home/ec2-user/upload/files:/usr/upload/files \
               -e SPRING_PROFILES_ACTIVE="${{ env.SPRING_PROFILES_ACTIVE }}" \
               -e SERVER_PORT="${{ env.SERVER_PORT }}" \
               -e DB_DRIVER="${{ env.DB_DRIVER }}" \
@@ -125,6 +130,9 @@ jobs:
               -e MAIL_USER="${{ env.MAIL_USER }}" \
               -e MAIL_PW="${{ env.MAIL_PW }}" \
               -e JWT_SECRET="${{ env.JWT_SECRET }}" \
+              -e KAKAO_MAP_KEY="${{ env.KAKAO_MAP_KEY }}" \
+              -e IMAGE_LOCATION="${{ env.IMAGE_LOCATION }}" \
+              -e FILE_LOCATION="${{ env.FILE_LOCATION }}" \
               "${{ env.IMAGE_NAME }}:latest"
 
 
