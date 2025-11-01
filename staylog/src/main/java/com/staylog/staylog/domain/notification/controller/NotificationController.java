@@ -1,5 +1,6 @@
 package com.staylog.staylog.domain.notification.controller;
 
+import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import com.staylog.staylog.domain.notification.service.NotificationService;
 import com.staylog.staylog.global.common.code.SuccessCode;
@@ -61,12 +62,12 @@ public class NotificationController {
     /**
      * 알림 읽음 처리
      * @author 이준혁
-     * @param notiId 알림 PK
+     * @param readRequest 알림 PK
      */
     @Operation(summary = "알림 읽음 처리", description = "알림의 읽음 상태를 Y로 변경합니다.")
     @PatchMapping("/notification/read")
-    public ResponseEntity<SuccessResponse<Void>> readNotification(long notiId) {
-        notificationService.readNotification(notiId);
+    public ResponseEntity<SuccessResponse<Void>> readNotification(@RequestBody ReadRequest readRequest) {
+        notificationService.readNotification(readRequest);
 
         String message = messageUtil.getMessage(SuccessCode.NOTIFICATION_READ.getMessageKey());
         String code = SuccessCode.NOTIFICATION_READ.name();

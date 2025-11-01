@@ -2,6 +2,7 @@ package com.staylog.staylog.domain.notification.service.impl;
 
 
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import com.staylog.staylog.domain.notification.mapper.NotificationMapper;
 import com.staylog.staylog.domain.notification.service.NotificationService;
@@ -74,14 +75,14 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 알림 읽음 처리
      * @author 이준혁
-     * @param notiId 알림 PK
+     * @param readRequest 알림 PK
      */
     @Override
-    public void readNotification(long notiId) {
-        int isSuccess = notificationMapper.updateReadNotification(notiId);
+    public void readNotification(ReadRequest readRequest) {
+        int isSuccess = notificationMapper.readNotification(readRequest);
 
         if(isSuccess == 0) {
-            log.warn("알림 데이터 읽음 처리 실패: 알림 정보를 찾을 수 없습니다. - notiId={}", notiId);
+            log.warn("알림 데이터 읽음 처리 실패: 알림 정보를 찾을 수 없습니다. - notiId={}", readRequest);
             throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
     }

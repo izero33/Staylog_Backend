@@ -30,10 +30,10 @@
     </delete>
 
     <!-- 알림 읽음 처리 -->
-    <update id="readNotification" parameterType="long">
+    <update id="readNotification" parameterType="readRequest">
         UPDATE notification
         SET is_read = 'Y'
-        WHERE noti_id #{notiId}
+        WHERE noti_id = #{notiId}
     </update>
 
 </mapper>

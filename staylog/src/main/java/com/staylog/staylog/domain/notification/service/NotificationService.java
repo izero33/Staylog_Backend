@@ -1,6 +1,7 @@
 package com.staylog.staylog.domain.notification.service;
 
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public interface NotificationService {
     /**
      * 알림 읽음 처리
      * @author 이준혁
-     * @param notiId 알림 PK
+     * @param readRequest 알림 PK
      */
-    public void readNotification(long notiId);
+    public void readNotification(ReadRequest readRequest);
 }
