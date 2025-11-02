@@ -10,8 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -73,6 +75,21 @@ public class NotificationController {
         String code = SuccessCode.NOTIFICATION_READ.name();
         return ResponseEntity.ok(SuccessResponse.of(code, message, null));
     }
+
+
+    /**
+     * 클라이언트 구독 컨트롤러 메서드
+     * @author 이준혁
+     * @param token AccessToken
+     * @return SseEmitter
+     */
+    @Operation(summary = "알림 목록 조회", description = "로그인한 사용자의 모든 알림 리스트를 조회합니다.")
+    @GetMapping(value = "/v1/notification/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(@RequestParam String token) {
+
+        return notificationService.subscribe(token);
+    }
+    
 
 
 

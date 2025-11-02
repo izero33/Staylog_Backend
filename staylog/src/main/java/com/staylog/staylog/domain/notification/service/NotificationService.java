@@ -3,6 +3,7 @@ package com.staylog.staylog.domain.notification.service;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,4 +42,7 @@ public interface NotificationService {
      * @param readRequest 알림 PK
      */
     public void readNotification(ReadRequest readRequest);
+
+
+    public SseEmitter subscribe(String token);
 }

@@ -83,7 +83,10 @@ public enum ErrorCode {
 
     // ==================== 알림 관련 에러 (10xxx) ====================
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E10001", "error.notification.not.found"),
-    NOTIFICATION_FAILED(HttpStatus.BAD_REQUEST, "E10002", "error.notification.failed");
+    NOTIFICATION_FAILED(HttpStatus.BAD_REQUEST, "E10002", "error.notification.failed"),
+    NOTIFICATION_SUBSCRIBE_FAILED(HttpStatus.BAD_REQUEST, "E10003", "error.notification.subscribe.failed"),
+    NOTIFICATION_EMITTER_NOT_FOUND(HttpStatus.NOT_FOUND, "E10004", "error.notification.emitter.not.found");
+
 
     private final HttpStatus status;
     private final String code;

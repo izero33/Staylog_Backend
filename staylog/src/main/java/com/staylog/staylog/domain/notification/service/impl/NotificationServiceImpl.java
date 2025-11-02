@@ -8,13 +8,17 @@ import com.staylog.staylog.domain.notification.mapper.NotificationMapper;
 import com.staylog.staylog.domain.notification.service.NotificationService;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.exception.BusinessException;
+import com.staylog.staylog.global.security.jwt.JwtTokenProvider;
+import com.staylog.staylog.global.security.jwt.JwtTokenValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -22,6 +26,16 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenValidator jwtTokenValidator;
+
+
+    // Emitter 타임아웃 시간 (30분)
+    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 30;
+
+    // UserId, SeeEmitter를 key-value 형태로 가지는 맵
+    // 동시성 처리를 위한 ConcurrentHashMap
+    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     /**
      * 알림 데이터 저장
@@ -88,4 +102,47 @@ public class NotificationServiceImpl implements NotificationService {
             throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
     }
+
+    
+    /**
+     * 클라이언트 구독 메서드
+     * @author 이준혁
+     * @param token AccessToken
+     * @return SseEmitter
+     */
+    @Override
+    public SseEmitter subscribe(String token) {
+
+        boolean isValid = jwtTokenValidator.validateAccessToken(token);
+        if(!isValid) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        long userId = jwtTokenProvider.getUserIdFromToken(token);
+        if(userId == 0) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // SseEmitter를 생성하고 Map에 저장
+        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+        emitters.put(userId, emitter);
+
+        // 완료, 타임아웃, 에러 발생 시 해당 emitter 제거
+        emitter.onCompletion(() -> emitters.remove(userId));
+        emitter.onTimeout(() -> emitters.remove(userId));
+        emitter.onError((e) -> emitters.remove(userId));
+
+        try { // 연결 성공 및 더미 데이터 전송
+            emitter.send(SseEmitter.event()
+                    .name("connect")
+                    .data("Connected! (userId: " + userId + ")"));
+        } catch (IOException e) {
+            log.warn("알림 채널 구독 실패 - userId={}", userId);
+            throw new BusinessException(ErrorCode.NOTIFICATION_SUBSCRIBE_FAILED);
+        }
+
+        return emitter;
+    }
+
+
 }
