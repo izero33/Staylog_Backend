@@ -145,4 +145,29 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
+    /**
+     * 알림 전송 메서드
+     * @author 이준혁
+     * @param userId 알림 받을 유저 PK
+     * @param newNotification JSON으로 변환된 알림 데이터
+     */
+    public void sendNotification(Long userId, NotificationResponse newNotification) {
+
+        SseEmitter emitter = emitters.get(userId);
+
+        if(emitter != null) {
+            try {
+                // new-notification 이벤트로 JSON으로 변환된 알림 전송
+                emitter.send(SseEmitter.event()
+                        .name("new-notification")
+                        .data(newNotification));
+            } catch (IOException e) {
+                // 클라이언트 연결이 끊겼을 경우 제거
+                emitters.remove(userId);
+                log.warn("유효하지 않은 Emitter - userId={}", userId);
+                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
+            }
+        }
+    }
+
 }

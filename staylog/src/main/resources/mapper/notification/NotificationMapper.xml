@@ -11,7 +11,7 @@
             FROM DUAL
         </selectKey>
         INSERT INTO notification(noti_id, user_id, noti_type, target_id, details)
-        VALUES(#{notiID}, #{userId}, #{notiType}, #{targetId}, #{details})
+        VALUES(#{notiId}, #{userId}, #{notiType}, #{targetId}, #{details})
     </insert>
 
 
