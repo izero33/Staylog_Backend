@@ -38,21 +38,88 @@ public class NotificationServiceImpl implements NotificationService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     /**
-     * 알림 데이터 저장
-     * 알림 별로 필요한 상세데이터는 해당하는 서비스 로직에서
+     * 알림 데이터 저장 및 푸시
+     * @apiNote 알림 별로 필요한 상세데이터는 해당하는 서비스 로직에서
      * JSON 형식으로 notificationRequest.details 필드에 담아 가져온다.
+     * notificationRequest를 사용해서 DB에 저장 후 String Type인 details 필드의 값을 사용해,
+     * NotificationResponse를 구성하여 사용자에게 PUSH한다.
      * @author 이준혁
-     * @param notificationRequest 알림 정보
+     * @param notificationRequest 알림 데이터 + JSON 형태의 String Type 데이터
      */
     @Override
-    public void createNotification(NotificationRequest notificationRequest) {
+    public void saveAndPushNotification(NotificationRequest notificationRequest) {
         int isSuccess = notificationMapper.notiSave(notificationRequest);
 
         if(isSuccess == 0) {
             log.warn("알림 데이터 저장 실패: 잘못된 알림 데이터 - notificationRequest={}", notificationRequest);
             throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
+
+        Long userId = notificationRequest.getUserId();
+        NotificationResponse notificationResponse = new NotificationResponse();
+
+        // TODO: notificationResponse 구성 필요
+
+        SseEmitter emitter = emitters.get(userId);
+
+        if(emitter != null) {
+            try {
+                // new-notification 이벤트로 JSON으로 변환된 알림 전송
+                emitter.send(SseEmitter.event()
+                        .name("new-notification")
+                        .data(notificationResponse));
+            } catch (IOException e) {
+                // 클라이언트 연결이 끊겼을 경우 제거
+                emitters.remove(userId);
+                log.warn("유효하지 않은 Emitter - userId={}", userId);
+                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
+            }
+        }
     }
+
+
+//    /**
+//     * 알림 전송 메서드
+//     * @author 이준혁
+//     * @param userId 알림 받을 유저 PK
+//     * @param newNotification JSON으로 변환된 알림 데이터
+//     */
+//    public void sendNotification(Long userId, NotificationResponse newNotification) {
+//
+//        SseEmitter emitter = emitters.get(userId);
+//
+//        if(emitter != null) {
+//            try {
+//                // new-notification 이벤트로 JSON으로 변환된 알림 전송
+//                emitter.send(SseEmitter.event()
+//                        .name("new-notification")
+//                        .data(newNotification));
+//            } catch (IOException e) {
+//                // 클라이언트 연결이 끊겼을 경우 제거
+//                emitters.remove(userId);
+//                log.warn("유효하지 않은 Emitter - userId={}", userId);
+//                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
+//            }
+//        }
+//    }
+
+
+    // 일단 백업
+//    @Override
+//    public void createNotification(NotificationRequest notificationRequest) {
+//        int isSuccess = notificationMapper.notiSave(notificationRequest);
+//
+//        if(isSuccess == 0) {
+//            log.warn("알림 데이터 저장 실패: 잘못된 알림 데이터 - notificationRequest={}", notificationRequest);
+//            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+//        }
+//
+//        // TODO: 알림 저장 후 사용자에게 PUSH 필요
+//    }
+
+
+
+
 
     /**
      * 유저 한명의 알림 리스트 조회
@@ -145,29 +212,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-    /**
-     * 알림 전송 메서드
-     * @author 이준혁
-     * @param userId 알림 받을 유저 PK
-     * @param newNotification JSON으로 변환된 알림 데이터
-     */
-    public void sendNotification(Long userId, NotificationResponse newNotification) {
 
-        SseEmitter emitter = emitters.get(userId);
-
-        if(emitter != null) {
-            try {
-                // new-notification 이벤트로 JSON으로 변환된 알림 전송
-                emitter.send(SseEmitter.event()
-                        .name("new-notification")
-                        .data(newNotification));
-            } catch (IOException e) {
-                // 클라이언트 연결이 끊겼을 경우 제거
-                emitters.remove(userId);
-                log.warn("유효하지 않은 Emitter - userId={}", userId);
-                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
-            }
-        }
-    }
 
 }

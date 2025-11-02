@@ -11,11 +11,11 @@ public interface NotificationService {
 
 
     /**
-     * 알림 데이터 저장
+     * 알림 데이터 저장 및 푸시
      * @author 이준혁
      * @param notificationRequest 알림 정보
      */
-    public void createNotification(NotificationRequest notificationRequest);
+    public void saveAndPushNotification(NotificationRequest notificationRequest);
 
 
     /**
