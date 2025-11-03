@@ -3,6 +3,7 @@ package com.staylog.staylog.domain.notification.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadAllRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.CommentNotiDetails;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
@@ -188,17 +189,30 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * 알림 읽음 처리
-     *
+     * 단일 알림 읽음 처리
      * @param readRequest 알림 PK
      * @author 이준혁
      */
     @Override
-    public void readNotification(ReadRequest readRequest) {
-        int isSuccess = notificationMapper.readNotification(readRequest);
+    public void readOne(ReadRequest readRequest) {
+        int isSuccess = notificationMapper.readOne(readRequest);
 
         if (isSuccess == 0) {
             log.warn("알림 데이터 읽음 처리 실패: 알림 정보를 찾을 수 없습니다. - notiId={}", readRequest);
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
+    }
+
+    /**
+     * 모든 알림 읽음 처리
+     * @param readAllRequest 유저 PK
+     */
+    @Override
+    public void readAll(ReadAllRequest readAllRequest) {
+        int isSuccess = notificationMapper.readAll(readAllRequest);
+
+        if (isSuccess == 0) {
+            log.warn("알림 데이터 읽음 처리 실패: 알림 정보를 찾을 수 없습니다. - userId={}", readAllRequest);
             throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
     }

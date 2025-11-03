@@ -28,11 +28,17 @@
         WHERE noti_id = #{notiId}
     </delete>
 
-    <!-- 알림 읽음 처리 -->
-    <update id="readNotification" parameterType="readRequest">
+    <!-- 단일 알림 읽음 처리 -->
+    <update id="readOne" parameterType="readRequest">
         UPDATE notification
         SET is_read = 'Y'
         WHERE noti_id = #{notiId}
+    </update>
+
+    <!-- 모든 알림 읽음 처리 -->
+    <update id="readAll" parameterType="readAllRequest">
+        UPDATE notification
+        SET is_read = 'Y'
     </update>
 
     <!-- 안읽은 알림 수 조회 -->

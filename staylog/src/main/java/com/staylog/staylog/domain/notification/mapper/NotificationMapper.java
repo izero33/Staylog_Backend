@@ -1,6 +1,7 @@
 package com.staylog.staylog.domain.notification.mapper;
 
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadAllRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import org.apache.ibatis.annotations.Mapper;
@@ -38,11 +39,18 @@ public interface NotificationMapper {
 
 
     /**
-     * 알림 읽음 처리
+     * 단일 알림 읽음 처리
      * @param readRequest 알림 PK
      * @return 성공 여부 1 또는 0
      */
-    public int readNotification(ReadRequest readRequest);
+    public int readOne(ReadRequest readRequest);
+
+    /**
+     * 모든 알림 읽음 처리
+     * @param readAllRequest 유저 PK
+     * @return 성공 여부 1 또는 0
+     */
+    public int readAll(ReadAllRequest readAllRequest);
 
     /**
      * 안읽은 알림 수 조회

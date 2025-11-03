@@ -1,6 +1,7 @@
 package com.staylog.staylog.domain.notification.service;
 
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadAllRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -36,11 +37,17 @@ public interface NotificationService {
 
 
     /**
-     * 알림 읽음 처리
+     * 단일 알림 읽음 처리
      * @author 이준혁
      * @param readRequest 알림 PK
      */
-    public void readNotification(ReadRequest readRequest);
+    public void readOne(ReadRequest readRequest);
+
+    /**
+     * 모든 알림 읽음 처리
+     * @param readAllRequest 유저 PK
+     */
+    public void readAll(ReadAllRequest readAllRequest);
 
     /**
      * 클라이언트 구독 메서드
