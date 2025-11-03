@@ -1,4 +1,4 @@
-package com.staylog.staylog.domain.admin.booking.dto;
+package com.staylog.staylog.domain.admin.reservation.dto;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminBookingDto {
+public class AdminReservationDto {
     private Long bookingId;          // 예약 ID
     private String bookingNum;       // 예약 번호
     private String guestName;        // 투숙객 이름
@@ -26,8 +26,10 @@ public class AdminBookingDto {
     private Integer totalGuestCount; // 총 인원수
     private Integer amount;          // 결제 금액
     private String status;           // 예약 상태 코드
-    private String statusName;       // 예약 상태명 (COMMON_CODE 참조)
-    private String statusColor;      // 상태 색상 (COMMON_CODE.ATTR1)
+    private String statusName;       // 예약 상태명
+    private String statusColor;      // 상태 색상
     private LocalDateTime createdAt; // 예약일 (결제일)
+    private LocalDateTime updatedAt;
+
 
 }
