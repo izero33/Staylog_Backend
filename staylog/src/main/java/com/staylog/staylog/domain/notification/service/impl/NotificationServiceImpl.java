@@ -1,9 +1,13 @@
 package com.staylog.staylog.domain.notification.service.impl;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
+import com.staylog.staylog.domain.notification.dto.response.CommentNotiDetails;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
+import com.staylog.staylog.domain.notification.dto.response.ReservationNotiDetails;
+import com.staylog.staylog.domain.notification.dto.response.ReviewNotiDetails;
 import com.staylog.staylog.domain.notification.mapper.NotificationMapper;
 import com.staylog.staylog.domain.notification.service.NotificationService;
 import com.staylog.staylog.global.common.code.ErrorCode;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenValidator jwtTokenValidator;
+    private final ObjectMapper objectMapper;
 
 
     // Emitter 타임아웃 시간 (30분)
@@ -36,6 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
     // UserId, SeeEmitter를 key-value 형태로 가지는 맵
     // 동시성 처리를 위한 ConcurrentHashMap
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+
 
     /**
      * 알림 데이터 저장 및 푸시
@@ -52,15 +59,27 @@ public class NotificationServiceImpl implements NotificationService {
 
         if(isSuccess == 0) {
             log.warn("알림 데이터 저장 실패: 잘못된 알림 데이터 - notificationRequest={}", notificationRequest);
-            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+            // 여기서 throw를 던지면 롤백 발생
+//            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
 
         Long userId = notificationRequest.getUserId();
-        NotificationResponse notificationResponse = new NotificationResponse();
-
-        // TODO: notificationResponse 구성 필요
-
         SseEmitter emitter = emitters.get(userId);
+
+        // JSON으로 변환
+        Object detailsObject = deserializeDetails(notificationRequest.getNotiType(), notificationRequest.getDetails());
+        
+        // NotificationResponse 구성
+        NotificationResponse notificationResponse = NotificationResponse.builder()
+                .notiId(notificationRequest.getNotiId()) // selectKey로 가져온 PK
+                .userId(notificationRequest.getUserId())
+                .notiType(notificationRequest.getNotiType())
+                .targetId(notificationRequest.getTargetId())
+                .isRead("N")
+                .createdAt(LocalDateTime.now())
+                .details(detailsObject) // 변환된 객체
+                .build();
+
 
         if(emitter != null) {
             try {
@@ -72,8 +91,41 @@ public class NotificationServiceImpl implements NotificationService {
                 // 클라이언트 연결이 끊겼을 경우 제거
                 emitters.remove(userId);
                 log.warn("유효하지 않은 Emitter - userId={}", userId);
-                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
+                // 여기서 throw를 던지면 롤백 발생
+//                throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
             }
+        }
+    }
+
+    
+    /**
+     * notiType에 따라 details의 JSON 문자열을 DTO 객체로 역직렬화하는 메서드
+     * @author 이준혁
+     * @param notiType 알림 타입
+     * @param detailsJson 변환 전 데이터
+     */
+    private Object deserializeDetails(String notiType, String detailsJson) {
+        try {
+            if (detailsJson == null || detailsJson.isEmpty()) {
+                return null;
+            }
+
+            // 타입이 추가될 경우 여기에서 추가
+            switch (notiType) {
+                case "NOTI_RES_CONFIRM":
+                case "NOTI_RES_CANCEL":
+                    return objectMapper.readValue(detailsJson, ReservationNotiDetails.class);
+                case "NEW_REVIEW_CREATE":
+                    return objectMapper.readValue(detailsJson, ReviewNotiDetails.class);
+                case "NEW_COMMENT_CREATE":
+                    return objectMapper.readValue(detailsJson, CommentNotiDetails.class);
+                default:
+                    log.warn("알 수 없는 notiType입니다. : {}", notiType);
+                    return null;
+            }
+        } catch (Exception e) {
+            log.error("JSON 역직렬화 실패: notiType={}, json={}", notiType, detailsJson, e);
+            return null;
         }
     }
 

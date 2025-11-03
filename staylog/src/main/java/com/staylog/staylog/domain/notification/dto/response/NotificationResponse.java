@@ -2,10 +2,7 @@ package com.staylog.staylog.domain.notification.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.apache.ibatis.type.Alias;
 
 import java.time.LocalDateTime;
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
  * @author 이준혁
  */
 @Alias("notificationResponse")
+@Builder
 @Setter
 @Getter
 @AllArgsConstructor
