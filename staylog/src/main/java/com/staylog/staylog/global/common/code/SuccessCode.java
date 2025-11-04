@@ -45,6 +45,7 @@ public enum SuccessCode {
     // ==================== 예약 관련 성공 (5xxx) ====================
     BOOKING_CREATED(201, "S5001", "success.booking.created"),
     BOOKING_CANCELLED(200, "S5002", "success.booking.cancelled"),
+    BOOKING_STATUS_UPDATED(200, "S5003", "success.booking.status.updated"),
 
     // ==================== 결제 관련 성공 (6xxx) ====================
     PAYMENT_PREPARED(200, "S6001", "success.payment.prepared"),
@@ -72,9 +73,14 @@ public enum SuccessCode {
     NOTIFICATION_CREATE(201, "S9001", "success.notification.created"),
     NOTIFICATION_LIST_FIND(200, "S9002", "success.notification.list.find"),
     NOTIFICATION_DELETE(200, "S9003", "success.notification.delete"),
-	
+    NOTIFICATION_READ(200, "S9004", "success.notification.read"),
+    NOTIFICATION_UNREAD_COUNT(200, "S9005", "success.notification.unread-count"),
+
 	//===================== 객실 관련 성공 (10xxx)=====================
-	ROOM_SUCCESS(200, "S10001", "success.room");
+	ROOM_SUCCESS(200, "S10001", "success.room"),
+
+	//===================== 이미지 관련 성공 (11xxx)====================
+	IMAGE_UPLOAD_SUCCESS(201, "S11001", "success.image.uploaded");
 
     private final int httpStatus;
     private final String code;

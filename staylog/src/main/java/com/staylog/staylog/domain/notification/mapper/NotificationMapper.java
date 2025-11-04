@@ -1,6 +1,9 @@
 package com.staylog.staylog.domain.notification.mapper;
 
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.request.NotificationSelectRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadAllRequest;
+import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -23,7 +26,7 @@ public interface NotificationMapper {
      * @param userId 유저 PK
      * @return NotificationResponse
      */
-    public List<NotificationResponse> findNotificationsByUserId(long userId);
+    public List<NotificationSelectRequest> findNotificationsByUserId(long userId);
 
 
 
@@ -34,4 +37,29 @@ public interface NotificationMapper {
      * @return 성공 여부 1 또는 0
      */
     public int deleteByNotiId(long notiId);
+
+
+    /**
+     * 단일 알림 읽음 처리
+     * @author 이준혁
+     * @param readRequest 알림 PK
+     * @return 성공 여부 1 또는 0
+     */
+    public int readOne(ReadRequest readRequest);
+
+    /**
+     * 모든 알림 읽음 처리
+     * @author 이준혁
+     * @param readAllRequest 유저 PK
+     * @return 성공 여부 1 또는 0
+     */
+    public int readAll(ReadAllRequest readAllRequest);
+
+    /**
+     * 안읽은 알림 수 조회
+     * @author 이준혁
+     * @param userId 사용자 PK
+     * @return 안읽은 알림 수
+     */
+    public int unreadCount(long userId);
 }

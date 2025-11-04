@@ -3,7 +3,6 @@ package com.staylog.staylog.domain.admin.user.mapper;
 import com.staylog.staylog.domain.admin.user.dto.AdminUserDetailDto;
 import com.staylog.staylog.domain.admin.user.dto.AdminUserListDto;
 import com.staylog.staylog.domain.admin.user.dto.request.AdminUserListRequest;
-import com.staylog.staylog.domain.user.dto.UserDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,9 +33,9 @@ public interface AdminUserMapper {
     /**
      * 유저 권한 변경 (role 변경)
      */
-    int updateUserRole(@Param("userId") Long userId, @Param("role") String role);
+    void updateUserRole(@Param("userId") Long userId, @Param("role") String role);
     /**
      * 유저 정보 수정(상태)
      */
-    int updateUserStatus(@Param("userId") Long userId, @Param("status") String status);
+    void updateUserStatus(@Param("userId") Long userId, @Param("status") String status);
 }
