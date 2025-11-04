@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 관리자 예약 관리 서비스 구현체
+ * 관리자 예약 관리 서비스 인터페이스
+ *
+ * @author 고영석
  */
 @Service
 @RequiredArgsConstructor
