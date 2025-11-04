@@ -41,4 +41,12 @@ public interface UserMapper {
      * @return 사용자 정보
      */
     UserDto findByNickname(@Param("nickname") String nickname);
+
+
+    /**
+     * userId로 닉네임 조회
+     * @param userId 사용자 ID
+     * @return 닉네임
+     */
+    String findNicknameByUserId(@Param("userId") Long userId);
 }
