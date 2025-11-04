@@ -20,12 +20,10 @@ public class SearchServiceImpl implements SearchService {
     private final SearchMapper searchMapper;
 
     /**
-     * 하이브리드 3단계 쿼리 분리 방식으로 숙소 검색
-     *
-     * - 1단계: 예약 가능한 숙소만 필터링 (RESERVATION 테이블 1회 접근)
-     * - 2단계: 필터링된 숙소의 기본 정보 + 객실 집계 (RESERVATION 제외)
-     * - 3단계: 인기순 정렬 시만 예약 수 조회 (조건부 실행)
-     *
+     * - 1단계: 예약 가능한 숙소만 필터링
+     * - 2단계: 필터링된 숙소의 기본 정보 + 객실 집계
+     * - 3단계: 인기순 정렬 시만 예약 수 조회
+     * @Author danjae
      */
     @Override
     public List<AccomListResponse> searchAccommodations(AccomListRequest request) {

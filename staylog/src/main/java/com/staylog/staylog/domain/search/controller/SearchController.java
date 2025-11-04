@@ -25,12 +25,11 @@ public class SearchController {
     private final MessageUtil messageUtil;
 
     /**
-     * 숙소 리스트 검색 API (하이브리드 3단계 쿼리 방식)
-     *
      * @param request 검색 조건 (인원, 체크인/아웃, 지역, 정렬)
      * @return 검색된 숙소 리스트
+     * @Author danjae
      */
-    @Operation(summary = "숙소 검색", description = "조건에 따른 예약 가능한 숙소 리스트 조회 (3단계 쿼리 최적화 적용)")
+    @Operation(summary = "숙소 검색", description = "조건에 따른 예약 가능한 숙소 리스트 조회 ")
     @GetMapping("/search/accommodations")
     public ResponseEntity<SuccessResponse<List<AccomListResponse>>> searchAccommodations(
             @ModelAttribute AccomListRequest request) {
