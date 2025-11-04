@@ -3,6 +3,8 @@ package com.staylog.staylog.domain.board.service;
 
 import com.staylog.staylog.domain.board.dto.LikesDto;
 import com.staylog.staylog.domain.board.mapper.LikesMapper;
+import com.staylog.staylog.global.common.code.ErrorCode;
+import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +23,18 @@ public class LikesServiceImpl implements LikesService {
     }
 
     @Override
-    public void insert(LikesDto dto) {
-
-        likesMapper.insert(dto);
+    public void addLike(LikesDto likesDto) {
+        boolean exists = likesMapper.liked(likesDto.getBoardId(), likesDto.getUserId());
+        if (exists) {
+            throw new BusinessException(ErrorCode.BOARD_ALREADY_EXISTS);
+        }
+        likesMapper.addLike(likesDto);
     }
 
     @Override
-    public void delete(LikesDto dto) {
+    public void deleteLike(LikesDto dto) {
 
-        likesMapper.delete(dto);
+        likesMapper.deleteLike(dto);
     }
 
     @Override
@@ -39,7 +44,7 @@ public class LikesServiceImpl implements LikesService {
     }
 
     @Override
-    public int liked(long boardId, long userId) {
+    public boolean liked(long boardId, long userId) {
 
         return likesMapper.liked(boardId, userId);
     }

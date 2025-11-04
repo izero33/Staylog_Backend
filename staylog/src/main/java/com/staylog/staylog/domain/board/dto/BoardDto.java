@@ -47,7 +47,6 @@ public class BoardDto {
     private String title;           // 리뷰 제목
     private String content;         // 리뷰 내용
 
-
     private Integer rating;         // 별점 (1~5)
     private Integer viewsCount;     // 조회 수
     private Integer likes;          // 좋아요 수
