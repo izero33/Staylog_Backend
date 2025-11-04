@@ -51,7 +51,7 @@ public class SseServiceImpl implements SseService {
                     .data("Connected! (userId: " + userId + ")"));
         } catch (IOException e) {
             log.warn("알림 채널 구독 실패 - userId={}", userId);
-            throw new BusinessException(ErrorCode.NOTIFICATION_SUBSCRIBE_FAILED);
+            emitter.completeWithError(e);
         }
 
         return emitter;
