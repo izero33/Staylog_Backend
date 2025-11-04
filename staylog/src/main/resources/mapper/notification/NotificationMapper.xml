@@ -11,12 +11,11 @@
             FROM DUAL
         </selectKey>
         INSERT INTO notification(noti_id, user_id, noti_type, target_id, details)
-        VALUES(#{notiID}, #{userId}, #{notiType}, #{targetId}, #{details})
+        VALUES(#{notiId}, #{userId}, #{notiType}, #{targetId}, #{details})
     </insert>
 
-
     <!-- 알림 데이터 조회 -->
-    <select id="findNotificationsByUserId" parameterType="long" resultType="notificationResponse">
+    <select id="findNotificationsByUserId" parameterType="long" resultType="NotificationSelectRequest">
         SELECT *
         FROM notification
         WHERE user_id = #{userId}
@@ -29,4 +28,29 @@
         WHERE noti_id = #{notiId}
     </delete>
 
+    <!-- 단일 알림 읽음 처리 -->
+    <update id="readOne" parameterType="readRequest">
+        UPDATE notification
+        SET is_read = 'Y'
+        WHERE noti_id = #{notiId}
+    </update>
+
+    <!-- 모든 알림 읽음 처리 -->
+    <update id="readAll" parameterType="readAllRequest">
+        UPDATE notification
+        SET is_read = 'Y'
+    </update>
+
+    <!-- 안읽은 알림 수 조회 -->
+    <select id="unreadCount" parameterType="long" resultType="int">
+        SELECT count(*)
+        FROM notification
+        WHERE user_id = #{userId} AND is_read = 'N'
+    </select>
+
 </mapper>
+
+
+
+
+

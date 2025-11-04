@@ -45,34 +45,30 @@ public enum SuccessCode {
     // ==================== 예약 관련 성공 (5xxx) ====================
     BOOKING_CREATED(201, "S5001", "success.booking.created"),
     BOOKING_CANCELLED(200, "S5002", "success.booking.cancelled"),
+    BOOKING_STATUS_UPDATED(200, "S5003", "success.booking.status.updated"),
 
     // ==================== 결제 관련 성공 (6xxx) ====================
     PAYMENT_PREPARED(200, "S6001", "success.payment.prepared"),
     PAYMENT_COMPLETED(200, "S6002", "success.payment.completed"),
     REFUND_COMPLETED(200, "S6003", "success.payment.refunded"),
 
-    // ==================== 게시판 관련 성공 (8xxx) ====================
-    BOARD_LIST_FETCHED(200, "S8004", "success.board.list"),
-    BOARD_DETAIL_FETCHED(200, "S8005", "success.board.detail"),
-    BOARD_CREATED(201, "S8001", "success.board.created"),
-    BOARD_UPDATED(200, "S8002", "success.board.updated"),
-    BOARD_DELETED(200, "S8003", "success.board.deleted"),
+    // ==================== 게시판 관련 성공 (7xxx) ====================
+    BOARD_LIST_FETCHED(200, "S7004", "success.board.list"),
+    BOARD_DETAIL_FETCHED(200, "S7005", "success.board.detail"),
+    BOARD_CREATED(201, "S7001", "success.board.created"),
+    BOARD_UPDATED(200, "S7002", "success.board.updated"),
+    BOARD_DELETED(200, "S7003", "success.board.deleted"),
 
-    // ==================== 리뷰 관련 성공 (7xxx) ====================
-    REVIEW_CREATED(201, "S7001", "success.review.created"),
-    REVIEW_UPDATED(200, "S7002", "success.review.updated"),
-    REVIEW_DELETED(200, "S7003", "success.review.deleted"),
-
-    // ==================== 저널 관련 성공 (8xxx) ====================
-    JOURNAL_CREATED(201, "S8001", "success.journal.created"),
-    JOURNAL_UPDATED(200, "S8002", "success.journal.updated"),
-    JOURNAL_DELETED(200, "S8003", "success.journal.deleted"),
-
+    // ==================== 이미지 관련 성공 (8xxx) ====================
+    IMAGE_UPLOAD_SUCCESS(201, "S8001", "success.image.uploaded");
+  
     // ==================== 알림 관련 성공 (9xxx) ====================
     NOTIFICATION_CREATE(201, "S9001", "success.notification.created"),
     NOTIFICATION_LIST_FIND(200, "S9002", "success.notification.list.find"),
     NOTIFICATION_DELETE(200, "S9003", "success.notification.delete"),
-	
+    NOTIFICATION_READ(200, "S9004", "success.notification.read"),
+    NOTIFICATION_UNREAD_COUNT(200, "S9005", "success.notification.unread-count"),
+
 	//===================== 객실 관련 성공 (10xxx)=====================
 	ROOM_SUCCESS(200, "S10001", "success.room"),
 	

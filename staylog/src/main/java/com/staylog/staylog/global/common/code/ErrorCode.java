@@ -67,12 +67,13 @@ public enum ErrorCode {
     PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "E6004", "error.payment.amount.mismatch"),
     REFUND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E6005", "error.payment.refund.failed"),
 
-    // ==================== 리뷰 관련 에러 (7xxx) ====================
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "E7001", "error.review.not.found"),
-    REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "E7002", "error.review.already.exists"),
-    REVIEW_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "E7003", "error.review.not.authorized"),
+    // ==================== 게시판 관련 에러 (7xxx) ====================
+    BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "E7001", "error.board.not.found"),
+    BOARD_ALREADY_EXISTS(HttpStatus.CONFLICT, "E7002", "error.board.already.exists"),
+    BOARD_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "E7003", "error.board.not.authorized"),
+    BOARD_CREATE_FAILED(HttpStatus.BAD_REQUEST, "E7004", "error.board.not.created"),
 
-    // ==================== 저널 관련 에러 (8xxx) ====================
+    // xxxxxxxxxxxxxxxxxxxx 저널 관련 에러 (8xxx) 사용안함 xxxxxxxxxxxxxx
     JOURNAL_NOT_FOUND(HttpStatus.NOT_FOUND, "E8001", "error.journal.not.found"),
     JOURNAL_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "E8002", "error.journal.not.authorized"),
 
@@ -80,10 +81,14 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E9001", "error.file.upload.failed"),
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "E9002", "error.file.size.exceeded"),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "E9003", "error.file.invalid.type"),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "E9004", "error.file.not.found"),
 
     // ==================== 알림 관련 에러 (10xxx) ====================
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E10001", "error.notification.not.found"),
     NOTIFICATION_FAILED(HttpStatus.BAD_REQUEST, "E10002", "error.notification.failed"),
+    NOTIFICATION_SUBSCRIBE_FAILED(HttpStatus.BAD_REQUEST, "E10003", "error.notification.subscribe.failed"),
+    NOTIFICATION_EMITTER_NOT_FOUND(HttpStatus.NOT_FOUND, "E10004", "error.notification.emitter.not.found");
+
 
 	// ==================== 댓글 관련 에러 (11xxx) ====================
     COMMENTS_NOT_FOUND(HttpStatus.NOT_FOUND, "E11001", "error.comments.not.found"),
