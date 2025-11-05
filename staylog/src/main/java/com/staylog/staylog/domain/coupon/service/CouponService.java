@@ -1,0 +1,39 @@
+package com.staylog.staylog.domain.coupon.service;
+
+import com.staylog.staylog.domain.coupon.dto.request.CouponRequest;
+import com.staylog.staylog.domain.coupon.dto.response.CouponResponse;
+
+public interface CouponService {
+
+    /**
+     * 특정 유저의 모든 쿠폰 조회
+     * @author 이준혁
+     * @param userId 유저 PK
+     * @return CouponResponse[] 쿠폰 목록
+     */
+    public CouponResponse[] getByUserId(long userId);
+
+    /**
+     * 쿠폰 추가
+     * @author 이준혁
+     * @param couponRequest (userId, couponType)
+     * @return 성공 시 1, 실패 시 0 반환
+     */
+    public void saveCoupon(CouponRequest couponRequest);
+
+    /**
+     * 쿠폰 사용 처리
+     * @author 이준혁
+     * @param couponId 쿠폰 PK
+     * @return 성공 시 1, 실패 시 0 반환
+     */
+    public void useCoupon(long couponId);
+
+    /**
+     * 쿠폰 삭제
+     * @author 이준혁
+     * @param couponId 쿠폰 PK
+     * @return 성공 시 1, 실패 시 0 반환
+     */
+    public void deleteCoupon(long couponId);
+}
