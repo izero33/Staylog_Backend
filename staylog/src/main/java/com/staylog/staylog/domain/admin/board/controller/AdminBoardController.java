@@ -1,6 +1,6 @@
 package com.staylog.staylog.domain.admin.board.controller;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,12 +50,16 @@ public class AdminBoardController {
 	        description = "검색 조건에 맞는 게시글 목록을 조회합니다. 게시글타입을 제외한 모든 파라미터는 선택사항입니다."
 	    )
 	    @GetMapping("/admin/boards")
-	    public ResponseEntity<SuccessResponse<List<BoardDto>>> getlist(
+	    public ResponseEntity<SuccessResponse< Map<String, Object>>> getlist(
 	            @Parameter(description = "게시글 검색 조건") AdminBoardSearchRequest searchRequest) {
-	    	List<BoardDto> list = boardService.selectBoardList(searchRequest);
+	    	
+	    	// Service 에서 Map 반환 (boards + page 정보 포함)
+	    	Map<String, Object> result = boardService.selectBoardList(searchRequest);
+	    	
 	        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
 	        String code = SuccessCode.SUCCESS.name();
-	        SuccessResponse<List<BoardDto>> success = SuccessResponse.of(code, message, list);
+	        SuccessResponse<Map<String, Object>> success = SuccessResponse.of(code, message, result);
+	        
 	        return ResponseEntity.ok(success);
 	    }
 	    

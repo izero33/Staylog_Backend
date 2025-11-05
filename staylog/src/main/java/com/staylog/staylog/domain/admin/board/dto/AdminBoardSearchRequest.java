@@ -2,6 +2,8 @@ package com.staylog.staylog.domain.admin.board.dto;
 
 import org.apache.ibatis.type.Alias;
 
+import com.staylog.staylog.global.common.dto.PageRequest;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminBoardSearchRequest {
+public class AdminBoardSearchRequest extends PageRequest{
 	
 	/** 게시글 타입 (필수) */
     private String boardType;      // BOARD_REVIEW, BOARD_JOURNAL

@@ -14,10 +14,17 @@ public interface AdminBoardMapper {
 
     /**
      * 게시글 목록 조회
-     * @param BoardSearchDto 검색 조건 (키워드, 삭제여부, 정렬조건)
+     * @param AdminBoardSearchRequest 검색 조건 (키워드, 삭제여부, 정렬조건)
      * @return 게시글 목록
      */
     List<BoardDto> selectBoardList(AdminBoardSearchRequest searchRequest);
+    
+    /**
+     * 전체 게시글 수 조회
+     * @param AdminBoardSearchRequest 검색 조건 (키워드, 삭제여부, 정렬조건)
+     * @return 전체 게시글 
+     */
+    int countBoardList(AdminBoardSearchRequest searchRequest);
 
     /**
      * 게시글 상세 조회
