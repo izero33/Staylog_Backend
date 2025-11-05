@@ -17,5 +17,5 @@ public class AdminBoardStatusRequest {
     private Long boardId;
     
     /** 변환활 상태값 */
-    private String deletedYn;
+    private String deleted;
 }
