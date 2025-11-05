@@ -20,7 +20,7 @@
         ]]>
     </select>
 
-    <!-- 쿠폰 추가 -->
+    <!-- 쿠폰 발급 -->
     <insert id="saveCoupon" parameterType="couponRequest">
         <selectKey keyProperty="couponId" resultType="long" order="BEFORE">
             SELECT seq_coupon_id.NEXTVAL
@@ -28,6 +28,13 @@
         </selectKey>
         INSERT INTO coupon(coupon_id, user_id, name, discount, expired_at)
         VALUES(#{couponId}, #{userId}, #{name}, #{discount}, #{expiredAt})
+    </insert>
+
+    <!-- 모든 유저에게 쿠폰 발급 -->
+    <insert id="saveCouponToAllUsers" parameterType="couponBatchRequest">
+        INSERT INTO coupon(coupon_id, user_id, name, discount, expired_at)
+        SELECT seq_coupon_id.NEXTVAL, user_id, #{name}, #{discount}, #{expiredAt}
+        FROM users
     </insert>
 
     <!-- 쿠폰 사용 가능 여부 확인 -->

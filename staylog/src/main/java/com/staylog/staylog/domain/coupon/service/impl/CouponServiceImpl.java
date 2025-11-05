@@ -1,5 +1,6 @@
 package com.staylog.staylog.domain.coupon.service.impl;
 
+import com.staylog.staylog.domain.coupon.dto.request.CouponBatchRequest;
 import com.staylog.staylog.domain.coupon.dto.request.CouponRequest;
 import com.staylog.staylog.domain.coupon.dto.request.UseCouponRequest;
 import com.staylog.staylog.domain.coupon.dto.response.CouponCheckDto;
@@ -83,7 +84,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     /**
-     * 쿠폰 추가
+     * 쿠폰 발급
      *
      * @param couponRequest (userId, couponType)
      * @author 이준혁
@@ -93,6 +94,22 @@ public class CouponServiceImpl implements CouponService {
         int isSuccess = couponMapper.saveCoupon(couponRequest);
         if (isSuccess == 0) {
             log.warn("쿠폰 생성 실패: 잘못된 요청입니다. - couponRequest={}", couponRequest);
+            throw new BusinessException(ErrorCode.COUPON_FAILED_USED);
+        }
+    }
+
+    /**
+     * 모든 유저에게 쿠폰 일괄 발급
+     *
+     * @param couponBatchRequest couponBatchRequest Dto
+     * @author 이준혁
+     */
+    @Override
+    public void saveCouponToAllUsers(CouponBatchRequest couponBatchRequest) {
+        int isSuccess = couponMapper.saveCouponToAllUsers(couponBatchRequest);
+
+        if (isSuccess == 0) {
+            log.warn("쿠폰 생성 실패: 잘못된 요청입니다. - couponBatchRequest={}", couponBatchRequest);
             throw new BusinessException(ErrorCode.COUPON_FAILED_USED);
         }
     }
