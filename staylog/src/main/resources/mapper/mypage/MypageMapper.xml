@@ -109,42 +109,5 @@
         </choose>
     </select>
 
-    <!-- 6. 문의 내역 -->
-    <select id="selectInquiries"
-            resultType="InquiryInfoResponse">
-        <choose>
-            <when test="type == 'faq'">
-                SELECT
-                    f.faq_id AS id,
-                    f.question AS question,
-                    f.answer AS answer,
-                    f.category AS category,
-                    f.created_at AS createdAt
-                FROM faq f
-                ORDER BY f.created_at DESC
-            </when>
-            <otherwise>
-                SELECT
-                    i.inquiry_id AS id,
-                    i.title AS title,
-                    i.content AS content,
-                    i.status AS status,
-                    i.created_at AS createdAt
-                FROM inquiry i
-                WHERE i.user_id = #{userId}
-                ORDER BY i.created_at DESC
-            </otherwise>
-        </choose>
-    </select>
-
-    <!-- 7. 1:1 문의 작성 -->
-    <insert id="insertInquiry"
-            parameterType="InquiryWriteRequest"
-            useGeneratedKeys="true" keyProperty="inquiryId">
-        INSERT INTO inquiry (inquiry_id, user_id, title, content, status, created_at)
-        VALUES (seq_inquiry_id.NEXTVAL, #{userId}, #{title}, #{content}, 'WAITING', SYSDATE)
-    </insert>
-
-
 </mapper>
 

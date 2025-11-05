@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.staylog.staylog.domain.auth.dto.EmailVerificationDto;
 import com.staylog.staylog.domain.auth.mapper.EmailMapper;
-import com.staylog.staylog.domain.auth.service.AuthService;
+//import com.staylog.staylog.domain.auth.service.AuthService;
 import com.staylog.staylog.domain.mypage.dto.MemberInfoDto;
 import com.staylog.staylog.domain.mypage.dto.response.BookingInfoResponse;
 import com.staylog.staylog.domain.mypage.dto.response.ReviewInfoResponse;
@@ -33,7 +33,7 @@ public class MypageServiceImpl implements MypageService {
     private final MypageMapper mypageMapper;
     //비밀번호 변경 위해서 추가함:
     private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
+    //private final AuthService authService;
     private final EmailMapper emailMapper;
     
     /**
