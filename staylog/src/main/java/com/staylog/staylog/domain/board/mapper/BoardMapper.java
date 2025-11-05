@@ -25,10 +25,16 @@ public interface BoardMapper {
     List<BookingDto> bookingList(Long userId);
 
 
+<<<<<<< HEAD
     // 게시글 PK로 작성자 PK 조회(알림에서 사용할 목적)
     long getUserIdByBoardId(long boardId);
 
 
+=======
+    void increaseLikeCount(Long boardId);
+    void decreaseLikeCount(Long boardId);
+    void updateLikeCount(Long boardId);
+>>>>>>> d94413700b52ccd9d07c86dd853888e548d8ceba
 }
 
 
