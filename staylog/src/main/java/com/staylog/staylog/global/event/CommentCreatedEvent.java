@@ -2,6 +2,10 @@ package com.staylog.staylog.global.event;
 
 import lombok.*;
 
+/**
+ * 댓글 작성 이벤트 객체
+ * @author 이준혁
+ */
 @Setter
 @Getter
 @AllArgsConstructor

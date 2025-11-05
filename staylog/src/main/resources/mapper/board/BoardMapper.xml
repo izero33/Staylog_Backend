@@ -185,6 +185,13 @@
     </update>
 
 
+    <!-- 게시글 PK로 숙소명 조회 (알림에서 사용) -->
+    <select id="getAccommodationNameByBoardId" parameterType="long" resultType="String">
+        SELECT a.name
+        FROM accommodation a JOIN board b ON a.accommodation_id = b.accommodation_id
+        WHERE b.board_id = #{boardId}
+    </select>
+
 
 <!-- 시퀀스 생성 board
 

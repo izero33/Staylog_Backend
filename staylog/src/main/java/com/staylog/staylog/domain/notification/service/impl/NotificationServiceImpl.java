@@ -17,6 +17,7 @@ import com.staylog.staylog.domain.notification.service.SseService;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.event.CommentCreatedEvent;
+import com.staylog.staylog.global.event.ReviewCreatedEvent;
 import com.staylog.staylog.global.event.SignupEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,61 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserMapper userMapper;
     private final CommentsMapper commentsMapper;
     private final BoardMapper boardMapper;
+
+    /**
+     * 리뷰 게시글 작성 이벤트리스너 메서드
+     * @param event 이벤트 객체
+     * @author 이준혁
+     */
+    @Override
+    @TransactionalEventListener
+    public void handleReviewCreatedEvent(ReviewCreatedEvent event) {
+        long recipientId = (long) 7;  // TODO: 원래 Admin에게 보내야하지만 개발 환경이라 infreeJ 아이디로 수취
+        String nickname = userMapper.findNicknameByUserId(event.getUserId());
+        String accommodationName = boardMapper.getAccommodationNameByBoardId(event.getBoardId());
+
+        // 알림 카드에 출력할 데이터 구성
+        DetailsResponse detailsResponse = DetailsResponse.builder()
+                .imageUrl("https://picsum.photos/id/10/200/300")
+                .date(String.valueOf(LocalDateTime.now()))
+                .title(nickname)
+                .message(accommodationName + "의 새로운 리뷰")
+                .typeName("Review")
+                .build();
+
+        try {
+            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
+            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+
+            // INSERT의 parameterType 객체 구성
+            NotificationRequest notificationRequest = NotificationRequest.builder()
+                    .userId(recipientId)
+                    .notiType("NOTI_REVIEW_CREATE")
+                    .targetId(event.getBoardId())
+                    .details(detailsObject)
+                    .build();
+
+            // DB 저장
+            int success = notificationMapper.notiSave(notificationRequest);
+
+            if (success == 1) {
+                // 클라이언트에게 SSE로 푸시하기위한 객체 구성
+                NotificationResponse notificationResponse = NotificationResponse.builder()
+                        .notiId(notificationRequest.getNotiId()) // selectKey로 채워진 알림 PK
+                        .targetId(notificationRequest.getTargetId()) // 페이지 이동을 위한 PK
+                        .details(detailsResponse)
+                        .isRead("N")
+                        .createdAt(LocalDateTime.now())
+                        .build();
+
+                // SSE Push 메서드 호출
+                sseService.sendNotification(recipientId, notificationResponse);
+            }
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     /**
