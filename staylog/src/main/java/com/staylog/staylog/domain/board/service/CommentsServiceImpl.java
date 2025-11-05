@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentsServiceImpl implements CommentsService {
 
     private final CommentsMapper commentsMapper;
-    private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
 
     // 댓글 목록 조회

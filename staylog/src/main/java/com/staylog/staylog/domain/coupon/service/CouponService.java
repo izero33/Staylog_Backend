@@ -3,10 +3,19 @@ package com.staylog.staylog.domain.coupon.service;
 import com.staylog.staylog.domain.coupon.dto.request.CouponRequest;
 import com.staylog.staylog.domain.coupon.dto.request.UseCouponRequest;
 import com.staylog.staylog.domain.coupon.dto.response.CouponResponse;
+import com.staylog.staylog.global.event.SignupEvent;
 
 import java.util.List;
 
 public interface CouponService {
+
+    /**
+     * 회원가입 이벤트리스너 메서드
+     * @param event 이벤트 객체
+     * @author 이준혁
+     */
+    public void handleSignupEvent(SignupEvent event);
+
 
     /**
      * 특정 유저의 사용 가능한 모든 쿠폰 조회

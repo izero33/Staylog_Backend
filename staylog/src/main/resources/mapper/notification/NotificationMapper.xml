@@ -7,7 +7,7 @@
     <!-- 알림 데이터 저장 -->
     <insert id="notiSave" parameterType="notificationRequest">
         <selectKey keyProperty="notiId" resultType="long" order="BEFORE">
-            SELECT seq_notification_id
+            SELECT seq_notification_id.NEXTVAL
             FROM DUAL
         </selectKey>
         INSERT INTO notification(noti_id, user_id, noti_type, target_id, details)

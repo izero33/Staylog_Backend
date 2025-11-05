@@ -6,12 +6,21 @@ import com.staylog.staylog.domain.notification.dto.request.ReadRequest;
 import com.staylog.staylog.domain.notification.dto.response.DetailsResponse;
 import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import com.staylog.staylog.global.event.CommentCreatedEvent;
+import com.staylog.staylog.global.event.SignupEvent;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
 public interface NotificationService {
 
+
+    /**
+     * 회원가입 이벤트리스너 메서드
+     * @param event 이벤트 객체
+     * @author 이준혁
+     */
+    public void handleSignupEvent(SignupEvent event);
 
     /**
      * 댓글 작성 이벤트리스너 메서드

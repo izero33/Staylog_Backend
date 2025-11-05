@@ -10,4 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignupEvent {
+    private long userId;
+    private String nickname;
 }
