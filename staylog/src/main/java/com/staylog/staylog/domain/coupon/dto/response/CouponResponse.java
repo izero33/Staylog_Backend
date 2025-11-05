@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.ibatis.type.Alias;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Alias("couponResponse")
@@ -21,4 +22,5 @@ public class CouponResponse {
     private String isUsed;
     private LocalDateTime createdAt;
     private LocalDateTime usedAt;
+    private LocalDate expiredAt;
 }

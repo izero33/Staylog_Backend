@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.ibatis.type.Alias;
 
+import java.time.LocalDate;
+
 @Alias("couponRequest")
 @Setter
 @Getter
@@ -16,4 +18,5 @@ public class CouponRequest {
     private long userId;
     private String name;
     private int discount;
+    private LocalDate expiredAt;
 }

@@ -48,7 +48,7 @@ public class CouponController {
      * @return List<CouponResponse> 쿠폰 목록
      * @author 이준혁
      */
-    @Operation(summary = "이미 사용한 쿠폰 목록 조회", description = "로그인한 사용자의 이미 사용된 쿠폰 목록을 조회합니다.")
+    @Operation(summary = "사용 불가능한 쿠폰 목록 조회", description = "로그인한 사용자의 사용 불가능한 쿠폰 목록을 조회합니다.")
     @GetMapping("/coupon/{userId}/unavailable")
     public ResponseEntity<SuccessResponse<List<CouponResponse>>> getUnavailableCouponList(@PathVariable long userId) {
         List<CouponResponse> list = couponService.getUnavailableCouponList(userId);
@@ -63,7 +63,7 @@ public class CouponController {
      * @param couponRequest (userId, couponType)
      * @author 이준혁
      */
-    @Operation(summary = "쿠폰 생성", description = "쿠폰을 생성합니다. \n * 시퀀스로 PK를 생성하기 때문에 couponId는 빼고 입력해주세요.")
+    @Operation(summary = "쿠폰 생성", description = "쿠폰을 생성합니다. \n * 시퀀스로 PK를 생성하기 때문에 couponId는 빼고 입력해주세요. \n * expiredAt을 생략하면 무기한 쿠폰이 됩니다.")
     @PostMapping("/coupon")
     public ResponseEntity<SuccessResponse<Void>> saveCoupon(@RequestBody CouponRequest couponRequest) {
         couponService.saveCoupon(couponRequest);

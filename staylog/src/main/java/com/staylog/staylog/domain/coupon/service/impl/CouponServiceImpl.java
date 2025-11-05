@@ -40,7 +40,7 @@ public class CouponServiceImpl implements CouponService {
 
 
     /**
-     * 특정 유저의 이미 사용한 모든 쿠폰 조회
+     * 특정 유저의 사용 불가능한 모든 쿠폰 조회
      *
      * @param userId 유저 PK
      * @return List<CouponResponse> 쿠폰 목록
