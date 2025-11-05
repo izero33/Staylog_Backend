@@ -51,6 +51,14 @@ public interface CouponMapper {
     public int useCoupon(long couponId);
 
     /**
+     * 쿠폰 미사용 처리
+     * @author 이준혁
+     * @param couponId 쿠폰 PK
+     * @return 성공 시 1, 실패 시 0 반환
+     */
+    public int unuseCoupon(long couponId);
+
+    /**
      * 쿠폰 삭제
      * @author 이준혁
      * @param couponId 쿠폰 PK

@@ -45,6 +45,13 @@
         WHERE coupon_id = #{couponId} AND is_used = 'N' AND (expired_at IS NULL OR expired_at > SYSTIMESTAMP)
     </update>
 
+    <!-- 쿠폰 미사용처리 -->
+    <update id="unuseCoupon" parameterType="long">
+        UPDATE coupon
+        SET is_used = 'N', used_at = SYSTIMESTAMP
+        WHERE coupon_id = #{couponId}
+    </update>
+
     <!-- 쿠폰 삭제 -->
     <delete id="deleteCoupon" parameterType="long">
         DELETE FROM coupon
