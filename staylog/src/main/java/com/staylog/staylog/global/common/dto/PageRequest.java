@@ -1,10 +1,6 @@
 package com.staylog.staylog.global.common.dto;
 
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * 페이지 요청 정보 DTO
@@ -22,12 +18,15 @@ public class PageRequest {
     private int pageNum = 1;   // 요청한 페이지 번호 (기본값 1)
     private int pageSize = 10;  // 한 페이지당 게시글 수
 
+    // ROWNUM에서 사용할 시작 행 번호 (예: 1, 11, 21...)
+    public int getStartRow() {
 
-    private String keyword;     // 검색어
-    private String search;      // 검색 조건 ('title', 'content'...)
+        return (pageNum - 1) * pageSize + 1; 
+    }
+    
+    // ROWNUM에서 사용할 끝 행 번호 (예: 10, 20, 30...)
+    public int getEndRow() {
 
-    // DB 쿼리용 offset
-    public int getOffset(){
-        return (pageNum -1)*pageSize;
+        return pageNum * pageSize;
     }
 }

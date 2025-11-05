@@ -1,6 +1,6 @@
 package com.staylog.staylog.domain.admin.board.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -21,7 +21,7 @@ public interface AdminBoardService {
      * @param BoardSearchDto 검색 조건 (게시글타입, 키워드, 삭제여부, 정렬조건)
      * @return 게시글 목록
      */
-    List<BoardDto> selectBoardList(AdminBoardSearchRequest searchRequest);
+	Map<String, Object> selectBoardList(AdminBoardSearchRequest searchRequest);
 	
     /**
      * 게시글 상세 조회

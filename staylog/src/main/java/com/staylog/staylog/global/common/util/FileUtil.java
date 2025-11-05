@@ -18,10 +18,16 @@ public class FileUtil {
         }
 
         String originalName = file.getOriginalFilename();
-        String uuid = UUID.randomUUID().toString();
+        // 파일 확장자 추출
+        String extension = "";
+		if (originalName != null && originalName.contains(".")) {
+			extension = originalName.substring(originalName.lastIndexOf("."));
+		}
+        // UUID와 확장자를 조합하여 완전히 새로운 파일명 생성
+        String safeFileName = UUID.randomUUID().toString() + extension;
         String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-
-        String savedPath = Paths.get(datePath, uuid + "_" + originalName).toString().replace("\\", "/"); // 시스템 기본 경로 구분자 대신 URL에 적합한 '/'를 사용하도록 변경
+        // 시스템 기본 경로 구분자 대신 URL에 적합한 '/'를 사용하도록 변경
+        String savedPath = Paths.get(datePath, safeFileName).toString().replace("\\\\", "/");
         File destinationFile = new File(uploadPath, savedPath);
 
         destinationFile.getParentFile().mkdirs();

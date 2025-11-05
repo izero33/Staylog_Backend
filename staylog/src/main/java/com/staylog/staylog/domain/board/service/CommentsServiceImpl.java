@@ -1,7 +1,19 @@
 package com.staylog.staylog.domain.board.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.staylog.staylog.domain.board.mapper.BoardMapper;
+import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
+import com.staylog.staylog.domain.notification.dto.response.DetailsResponse;
+import com.staylog.staylog.domain.notification.service.NotificationService;
+import com.staylog.staylog.domain.user.dto.UserDto;
+import com.staylog.staylog.domain.user.mapper.UserMapper;
+import com.staylog.staylog.global.event.CommentCreatedEvent;
+import com.staylog.staylog.global.security.jwt.JwtTokenProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.staylog.staylog.domain.board.dto.CommentsDto;
@@ -11,6 +23,7 @@ import com.staylog.staylog.global.exception.BusinessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommentsServiceImpl implements CommentsService {
 
     private final CommentsMapper commentsMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 댓글 목록 조회
     @Override
@@ -37,21 +51,28 @@ public class CommentsServiceImpl implements CommentsService {
 
     // 댓글 등록
     @Override
-    public void insert(CommentsDto dto) {
-        log.info("댓글 등록 시작 : boardId = {}, userId = {}", dto.getBoardId(), dto.getUserId());
+    @Transactional
+    public void insert(CommentsDto commentsDto) {
+        log.info("댓글 등록 시작 : boardId = {}, userId = {}", commentsDto.getBoardId(), commentsDto.getUserId());
 
-        int rows = commentsMapper.insert(dto);
+        int rows = commentsMapper.insert(commentsDto);
 
         if (rows == 0) {
-            log.error("댓글 등록 실패 : boardId = {}", dto.getBoardId());
+            log.error("댓글 등록 실패 : boardId = {}", commentsDto.getBoardId());
             throw new BusinessException(ErrorCode.COMMENTS_FAILED_CREATED);
         }
 
-        log.info("댓글 등록 성공 : commentId = {}", dto.getCommentId());
+        log.info("댓글 등록 성공 : commentId = {}", commentsDto.getCommentId());
+
+        // =================== 댓글 작성 이벤트 발행 (알림에서 사용) ======================
+
+        CommentCreatedEvent event = new CommentCreatedEvent(commentsDto.getCommentId(), commentsDto.getUserId(), commentsDto.getBoardId());
+        eventPublisher.publishEvent(event);
     }
 
     // 댓글 수정
     @Override
+    @Transactional
     public void update(CommentsDto dto) {
         log.info("댓글 수정 시작 : commentId = {}", dto.getCommentId());
 
@@ -61,6 +82,8 @@ public class CommentsServiceImpl implements CommentsService {
             log.warn("댓글 수정 실패 : commentId = {}", dto.getCommentId());
             throw new BusinessException(ErrorCode.COMMENTS_NOT_FOUND);
         }
+
+
 
         log.info("댓글 수정 성공 : commentId = {}", dto.getCommentId());
     }
