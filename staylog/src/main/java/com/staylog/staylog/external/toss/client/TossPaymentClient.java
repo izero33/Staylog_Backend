@@ -33,6 +33,10 @@ public class TossPaymentClient {
         String url = tossConfig.getApiUrl() + "/confirm";
 
         HttpHeaders headers = createHeaders();
+
+        //멱등키 추가하기 (결제용)
+        headers.set("IdemtPotency-Key", generatePaymentIdempotencyKey(request.getPaymentKey()));
+
         HttpEntity<TossConfirmRequest> entity = new HttpEntity<>(request, headers);
 
         try {
@@ -63,8 +67,9 @@ public class TossPaymentClient {
         String url = tossConfig.getApiUrl() + "/" + paymentKey + "/cancel";
 
         HttpHeaders headers = createHeaders();
-        // 멱등키 추가 (중복 환불 방지)
-        headers.set("Idempotency-Key", generateIdempotencyKey(paymentKey));
+
+        // 멱등키 추가하기 (중복 환불 방지)
+        headers.set("Idempotency-Key", generateCancelIdempotencyKey(paymentKey));
 
         HttpEntity<TossCancelRequest> entity = new HttpEntity<>(request, headers);
 
@@ -124,10 +129,17 @@ public class TossPaymentClient {
     }
 
     /**
-     * 멱등키 생성 (paymentKey + timestamp 기반)
+     * 결제 멱등키 생성
      */
-    private String generateIdempotencyKey(String paymentKey) {
-        return paymentKey + "_" + System.currentTimeMillis();
+    private String generatePaymentIdempotencyKey(String paymentKey) {
+        return "CONFIRM_" + paymentKey;
+    }
+
+    /**
+     * 환불(취소) 멱등키 생성
+     */
+    private String generateCancelIdempotencyKey(String refundId) {
+        return "CANCEL_" + refundId;
     }
 
     /**
