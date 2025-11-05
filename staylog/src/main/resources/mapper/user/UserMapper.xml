@@ -33,6 +33,11 @@
         WHERE nickname = #{nickname}
     </select>
 
-
+    <!-- userId로 닉네임 조회 -->
+    <select id="findNicknameByUserId" parameterType="long" resultType="String">
+        SELECT nickname
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 
 </mapper>

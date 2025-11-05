@@ -10,6 +10,7 @@ import com.staylog.staylog.domain.auth.service.AuthService;
 import com.staylog.staylog.domain.user.dto.UserDto;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
 import com.staylog.staylog.global.common.code.ErrorCode;
+import com.staylog.staylog.global.event.SignupEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import com.staylog.staylog.global.security.entity.RefreshToken;
 import com.staylog.staylog.global.security.jwt.JwtTokenProvider;
@@ -20,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthMapper authMapper;
     private final EmailMapper emailMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${jwt.access-token-validity}")
     private long accessTokenValidity;
@@ -282,6 +285,11 @@ public class AuthServiceImpl implements AuthService {
 
         // 회원가입 완료 후 email_verification 테이블에서 사용된 인증 정보 삭제
         emailMapper.deleteVerificationByEmail(signupRequest.getEmail());
+
+        // ================= 회원가입 이벤트 발행 ==================
+        SignupEvent event = new SignupEvent(signupRequest.getUserId(), signupRequest.getNickname());
+        eventPublisher.publishEvent(event);
+
 
         return signupRequest.getUserId(); // createUser에서 PK를 받아온다
     }

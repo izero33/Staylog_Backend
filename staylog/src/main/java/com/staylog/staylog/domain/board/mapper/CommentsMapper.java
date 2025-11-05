@@ -16,4 +16,6 @@ public interface CommentsMapper {
     int delete(CommentsDto dto);
     // 댓글 수정
     int update(CommentsDto dto);
+    // 댓글 하나의 정보 가져오기
+    CommentsDto getOneByCommentId(Long CommentId);
 }
