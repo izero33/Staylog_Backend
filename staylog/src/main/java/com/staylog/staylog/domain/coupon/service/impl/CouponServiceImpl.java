@@ -28,7 +28,6 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 회원가입 이벤트리스너 메서드
-     *
      * @param event 이벤트 객체
      * @author 이준혁
      */
@@ -40,7 +39,7 @@ public class CouponServiceImpl implements CouponService {
                 .userId(event.getUserId())
                 .name("회원가입 웰컴 쿠폰")
                 .discount(5)
-                .expiredAt(LocalDate.now())
+                .expiredAt(LocalDate.now().plusDays(30)) // 30일 후 만료
                 .build();
 
         saveCoupon(couponRequest);
