@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.staylog.staylog.domain.auth.dto.EmailVerificationDto;
 import com.staylog.staylog.domain.auth.mapper.EmailMapper;
-import com.staylog.staylog.domain.auth.service.AuthService;
+//import com.staylog.staylog.domain.auth.service.AuthService;
 import com.staylog.staylog.domain.mypage.dto.MemberInfoDto;
 import com.staylog.staylog.domain.mypage.dto.response.BookingInfoResponse;
 import com.staylog.staylog.domain.mypage.dto.response.ReviewInfoResponse;
@@ -33,7 +33,7 @@ public class MypageServiceImpl implements MypageService {
     private final MypageMapper mypageMapper;
     //비밀번호 변경 위해서 추가함:
     private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
+    //private final AuthService authService;
     private final EmailMapper emailMapper;
     
     /**
@@ -64,8 +64,18 @@ public class MypageServiceImpl implements MypageService {
     public void updateMemberInfo(MemberInfoDto dto) {
         log.info("회원 정보 수정: userId={}", dto.getUserId());
         
-        // 이메일 변경 시, 이메일 인증 여부 검증
-        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+        // 기존 이메일과 새 이메일이 다를 때만 인증을 검사하도록 조건을 추가
+        // 기존 회원 정보 조회
+        MemberInfoDto currentInfo = mypageMapper.selectMemberInfo(dto.getUserId());
+        if (currentInfo == null) {
+            log.warn("회원 정보가 존재하지 않음: userId={}", dto.getUserId());
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        
+        // 이메일 변경 시에만 인증 여부 확인
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty() 
+        		&& !dto.getEmail().equals(currentInfo.getEmail())){
+        	
         	EmailVerificationDto verification = emailMapper.findVerificationByEmail(dto.getEmail());
         	if(verification == null || !"Y".equals(verification.getIsVerified())) {
         		log.warn("이메일 인증 미완료 상태에서 변경 시도: {}", dto.getEmail());

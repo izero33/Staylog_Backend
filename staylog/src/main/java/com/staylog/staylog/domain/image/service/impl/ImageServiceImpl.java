@@ -46,6 +46,7 @@ public class ImageServiceImpl implements ImageService {
             FileUploadDto fileUploadDto = null;
     		try {
     			fileUploadDto = FileUtil.saveFile(file, uploadPath);
+    			log.info("저장된 파일 경로"+uploadPath);
 	        } catch (IOException e) {
 	            log.error("이미지 업로드 중 IO 오류 발생", e);
 	            // GlobalExceptionHandler에서 처리하도록 예외를 다시 던집니다.
@@ -101,6 +102,17 @@ public class ImageServiceImpl implements ImageService {
 	public List<ImageServeDto> updateImages(List<MultipartFile> files) {
 		
 		return null;
+	}
+
+	
+	//정나영
+	@Override
+	public Long getBoardId() {
+		
+		//boardId 만 미리 발급 = 이미지 테이블의 TargetId 
+		Long imageId = imageMapper.getNextBoardId();
+		
+		return imageId;
 	}
 
 }
