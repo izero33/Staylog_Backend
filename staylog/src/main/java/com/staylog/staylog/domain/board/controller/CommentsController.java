@@ -35,7 +35,7 @@ public class CommentsController {
 
 	// 특정 게시글 댓글 목록 조회
 	@Operation(summary = "댓글 목록 조회", description = "게시글 ID로 댓글 목록을 조회")
-	@GetMapping("/comments/{boardId}")
+	@GetMapping("/boards/{boardId}/comments")
 	public ResponseEntity<SuccessResponse<List<CommentsDto>>> getCommentsByBoardId(
 	        @PathVariable("boardId") Long boardId) {
 	    
