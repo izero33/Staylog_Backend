@@ -31,6 +31,7 @@ public class BoardServiceImpl implements BoardService {
         // 전체 게시글 수
         int totalCount = boardMapper.countByBoardType(boardListRequest.getBoardType());
 
+        int totalPage = (int) Math.ceil((double) totalCount / boardListRequest.getPageSize());
 
 
 
@@ -38,14 +39,18 @@ public class BoardServiceImpl implements BoardService {
         PageResponse pageResponse = new PageResponse();
         pageResponse.calculate(pageRequest, totalCount);
 
+
+
         // 게시글 목록
         List<BoardDto> boardList = boardMapper.getByBoardType(boardListRequest);
 
         // 4️⃣ BoardListResponse로 묶어서 반환
-        return BoardListResponse.builder()
-                .boardList(boardList)
-                .pageResponse(pageResponse)
-                .build();
+        BoardListResponse boardListResponse = new BoardListResponse();
+        boardListResponse.setBoardList(boardList);
+        boardListResponse.setPageResponse(pageResponse);
+
+
+        return boardListResponse;
 
     }
 
