@@ -32,12 +32,14 @@ public class BoardServiceImpl implements BoardService {
         int totalCount = boardMapper.countByBoardType(boardListRequest.getBoardType());
 
 
-        // 게시글 목록
-        List<BoardDto> boardList = boardMapper.getByBoardType(boardListRequest);
+
 
         // 페이지 계산 결과
         PageResponse pageResponse = new PageResponse();
         pageResponse.calculate(pageRequest, totalCount);
+
+        // 게시글 목록
+        List<BoardDto> boardList = boardMapper.getByBoardType(boardListRequest);
 
         // 4️⃣ BoardListResponse로 묶어서 반환
         return BoardListResponse.builder()

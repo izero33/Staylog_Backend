@@ -238,7 +238,7 @@
     CREATE TABLE board (
         board_id           NUMBER PRIMARY KEY,
         accommodation_id   NUMBER NOT NULL,
-        booking_id         NUMBER NOT NULL,
+        booking_id         NUMBER ,
         user_id            NUMBER NOT NULL,
 
         region_code        VARCHAR2(20) NOT NULL,
