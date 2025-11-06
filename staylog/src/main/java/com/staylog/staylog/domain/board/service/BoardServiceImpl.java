@@ -26,6 +26,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public BoardListResponse getByBoardType(BoardListRequest boardListRequest, PageRequest pageRequest) {
 
+
+
         // 전체 게시글 수
         int totalCount = boardMapper.countByBoardType(boardListRequest.getBoardType());
 

@@ -6,6 +6,7 @@ import com.staylog.staylog.domain.board.dto.request.BoardListRequest;
 import com.staylog.staylog.domain.board.dto.response.BoardListResponse;
 
 import com.staylog.staylog.domain.board.service.BoardService;
+import com.staylog.staylog.domain.board.service.ViewsService;
 import com.staylog.staylog.global.common.code.SuccessCode;
 import com.staylog.staylog.global.common.dto.PageRequest;
 import com.staylog.staylog.global.common.response.SuccessResponse;
@@ -28,6 +29,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final ViewsService viewsService;
     private final MessageUtil messageUtil;
 
     // 게시판 카테고리별 목록 조회
@@ -105,7 +107,12 @@ public class BoardController {
 
     // 게시글 상세정보 불러오기
     @GetMapping("/boards/{boardId}")
-    public ResponseEntity<SuccessResponse<BoardDto>> getByBoardId(@PathVariable Long boardId) {
+    public ResponseEntity<SuccessResponse<BoardDto>> getByBoardId(@PathVariable Long boardId, @RequestParam(value = "userId", required = false) Long userId) {
+
+        // 조회 기록 처리
+        if(userId != null) {
+            viewsService.addView(userId, boardId);
+        }
 
         BoardDto board = boardService.getByBoardId(boardId);
 
