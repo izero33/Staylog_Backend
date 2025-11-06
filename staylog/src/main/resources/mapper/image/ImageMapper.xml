@@ -4,9 +4,9 @@
 <mapper namespace="com.staylog.staylog.domain.image.mapper.ImageMapper">
 
 	<insert id="insertImage" parameterType="imageDto">
-        <selectKey keyProperty="imageId" resultType="long" order="BEFORE">
-            SELECT seq_image_id.NEXTVAL FROM DUAL
-        </selectKey>
+		<selectKey keyProperty="imageId" resultType="long" order="BEFORE">
+		    SELECT seq_image_id.NEXTVAL FROM DUAL
+		</selectKey>
 		INSERT INTO image_file (
 		    image_id,
 			image_type, target_type, target_id,
@@ -21,21 +21,21 @@
 		)
 	</insert>
 	
-	<select id="selectMaxDisplayOrder" resultType="long">
+	<!-- <select id="selectMaxDisplayOrder" resultType="long">
         SELECT NVL(MAX(display_order), 0) + 1
         FROM image_file
         WHERE target_type = #{targetType} AND target_id = #{targetId}
-    </select>
+  </select>  -->
 
 	<select id="selectImagesByTarget" resultType="imageDto">
-        SELECT
-            image_id, image_type, target_type, target_id,
-            saved_url, original_name, file_size,
-            mime_type, display_order, upload_date
-        FROM image_file
-        WHERE target_type = #{targetType} AND target_id = #{targetId}
-        ORDER BY display_order ASC
-    </select>
+		SELECT
+			image_id, image_type, target_type, target_id,
+			saved_url, original_name, file_size,
+			mime_type, display_order, upload_date
+		FROM image_file
+		WHERE target_type = #{targetType} AND target_id = #{targetId}
+		ORDER BY display_order ASC
+	</select>
 
 	<select id="selectImageByTarget">
 		
@@ -44,5 +44,26 @@
 	<select id="getNextBoardId" resultType="long">
 		SELECT seq_board_id.NEXTVAL FROM DUAL
 	</select>
+	
+	<!--
+			displayOrder값의 동시성 문제 해결을 위한 count 테이블
+			MERGE 구문을 사용하여 행이 있으면 UPDATE, 없으면 INSERT를 수행 (Upsert).
+			이후 selectKey로 값을 조회하여 원자성을 보장하고 동시성 문제를 해결.
+	 -->
+	<update id="upsertAndGetCounter" parameterType="map">
+		<selectKey keyProperty="next_display_order" resultType="long" order="AFTER">
+			SELECT next_display_order
+    	FROM image_target_counter
+			WHERE target_type = #{targetType} AND target_id = #{targetId}
+		</selectKey>
+		MERGE INTO image_target_counter c
+    USING dual
+    ON (c.target_type = #{targetType} AND c.target_id = #{targetId})
+    WHEN MATCHED THEN
+			UPDATE SET c.next_display_order = c.next_display_order + 1
+    WHEN NOT MATCHED THEN
+			INSERT (target_type, target_id, next_display_order)
+			VALUES (#{targetType}, #{targetId}, 1)
+	</update>
 	
 </mapper>

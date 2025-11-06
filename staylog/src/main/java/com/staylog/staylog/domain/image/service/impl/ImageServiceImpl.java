@@ -19,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -33,8 +35,8 @@ public class ImageServiceImpl implements ImageService {
     @Value("${file.image-location}")
     private String uploadPath;
 
-    // displayOrder 계산 로직 보호용 락 객체
-    private final Object displaObjectLock = new Object();
+    // displayOrder 계산 로직 보호용 락 객체 -> DB 잠금으로 대체되어 더 이상 필요 없음
+//	private final Object displaObjectLock = new Object();
     
     @Override
     public List<ImageServeDto> saveImages(List<MultipartFile> files, String targetType, long targetId){
@@ -44,12 +46,6 @@ public class ImageServiceImpl implements ImageService {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
         
-        long displayOrder;
-        synchronized (displaObjectLock) {
-        	// displayOrder를 읽어와서 다음 순서로 넣어준다
-        	displayOrder = imageMapper.selectMaxDisplayOrder(prefixedTargetType, targetId);	
-		}
-        
         List<ImageDto> newImages = new ArrayList<>();
         
         for (MultipartFile file : files) {
@@ -57,6 +53,8 @@ public class ImageServiceImpl implements ImageService {
                 continue; // 빈 파일은 스킵
             }
 
+            long displayOrder = getNextDisplayOrder(prefixedTargetType, targetId);
+            
             FileUploadDto fileUploadDto = null;
     		try {
     			fileUploadDto = FileUtil.saveFile(file, uploadPath);
@@ -81,7 +79,7 @@ public class ImageServiceImpl implements ImageService {
                     .originalName(fileUploadDto.getOriginalName())
                     .fileSize(String.valueOf(file.getSize()))
                     .mimeType(file.getContentType())
-                    .displayOrder(displayOrder++) // 받아온 displayOrder값을 넣어준다.
+                    .displayOrder(displayOrder)
                     .build();
 
             imageMapper.insertImage(imageDto);
@@ -141,5 +139,22 @@ public class ImageServiceImpl implements ImageService {
         }
 		
 		return imagesServe;
+	}
+	
+	/**
+	 * IMAGE_TARGET_COUNTER 테이블을 사용하여 다음 displayOrder를 가져옴
+	 *  해당 target에 대한 카운터가 없으면 새로 생성하고, 있으면 1 증가
+	 * @param targetType 접두사가 붙은 targetType
+	 * @param targetId
+	 * @return 다음 displayOrder
+	 */
+	private long getNextDisplayOrder(String targetType, long targetId) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("targetType", targetType);
+		params.put("targetId", targetId);
+		
+		imageMapper.upsertAndGetCounter(params);
+		
+		return (long)params.get("next_display_order");
 	}
 }
