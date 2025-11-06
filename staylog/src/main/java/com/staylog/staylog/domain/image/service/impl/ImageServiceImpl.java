@@ -13,6 +13,7 @@ import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,14 +47,17 @@ public class ImageServiceImpl implements ImageService {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
         
+
+        // 필요한 displayOrder 개수만큼 한 번에 예약하고 시작 번호를 가져온다.
+        long startOrder = DisplayOrderRange(prefixedTargetType, targetId, files.size());
+        long currentDisplayOrder = startOrder;
+        
         List<ImageDto> newImages = new ArrayList<>();
         
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
                 continue; // 빈 파일은 스킵
             }
-
-            long displayOrder = getNextDisplayOrder(prefixedTargetType, targetId);
             
             FileUploadDto fileUploadDto = null;
     		try {
@@ -79,7 +83,7 @@ public class ImageServiceImpl implements ImageService {
                     .originalName(fileUploadDto.getOriginalName())
                     .fileSize(String.valueOf(file.getSize()))
                     .mimeType(file.getContentType())
-                    .displayOrder(displayOrder)
+                    .displayOrder(currentDisplayOrder++)
                     .build();
 
             imageMapper.insertImage(imageDto);
@@ -142,19 +146,43 @@ public class ImageServiceImpl implements ImageService {
 	}
 	
 	/**
-	 * IMAGE_TARGET_COUNTER 테이블을 사용하여 다음 displayOrder를 가져옴
-	 *  해당 target에 대한 카운터가 없으면 새로 생성하고, 있으면 1 증가
+	 * 필요한 개수(count)만큼의 displayOrder 범위를 예약하고, 시작 번호를 반환.
+	 * 
 	 * @param targetType 접두사가 붙은 targetType
 	 * @param targetId
-	 * @return 다음 displayOrder
+	 * @param count 예약할 displayOrder의 개수
+	 * @return 예약된 displayOrder의 시작 번호
 	 */
-	private long getNextDisplayOrder(String targetType, long targetId) {
+	@SuppressWarnings("unused")
+	private long DisplayOrderRange(String targetType, long targetId, int count) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("targetType", targetType);
 		params.put("targetId", targetId);
 		
-		imageMapper.upsertAndGetCounter(params);
+		while(true) {
+			// 1. 행을 잠그고 현재 카운터 값을 조회
+		    Long startOrder = imageMapper.selectForUpdate(params);
 		
-		return (long)params.get("next_display_order");
+		    if (startOrder != null) {
+		        // 2a. 카운터가 존재하면, 필요한 만큼(count) 증가시킨 값을 DB에 저장
+		        long nextOrder = startOrder + count;
+		        params.put("nextDisplayOrder", nextOrder);
+		        imageMapper.updateCounter(params);
+		        return startOrder; // 시작 번호 반환
+		    } else {
+		        // 2b. 카운터가 없으면 새로 생성
+		        try {
+		            long nextOrder = 1L + count;
+		            params.put("nextDisplayOrder", nextOrder);
+		            imageMapper.createCounter(params);
+		            return 1L; // 시작 번호는 1
+		        } catch (DuplicateKeyException e) {
+		            // 3. INSERT가 실패하면 (다른 트랜잭션이 방금 생성), 다시 시도
+		            log.warn("Race condition detected on counter creation for {}-{}, retrying.", targetType, targetId);
+		            // 다음 루프에서는 이미 생성된 카운터를 조회(selectForUpdate)하여 처리함.
+		            continue;
+		        }
+		    }
+		}
 	}
 }

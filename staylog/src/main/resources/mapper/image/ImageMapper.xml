@@ -45,25 +45,25 @@
 		SELECT seq_board_id.NEXTVAL FROM DUAL
 	</select>
 	
-	<!--
-			displayOrder값의 동시성 문제 해결을 위한 count 테이블
-			MERGE 구문을 사용하여 행이 있으면 UPDATE, 없으면 INSERT를 수행 (Upsert).
-			이후 selectKey로 값을 조회하여 원자성을 보장하고 동시성 문제를 해결.
-	 -->
-	<update id="upsertAndGetCounter" parameterType="map">
-		<selectKey keyProperty="next_display_order" resultType="long" order="AFTER">
-			SELECT next_display_order
-    	FROM image_target_counter
-			WHERE target_type = #{targetType} AND target_id = #{targetId}
-		</selectKey>
-		MERGE INTO image_target_counter c
-    USING dual
-    ON (c.target_type = #{targetType} AND c.target_id = #{targetId})
-    WHEN MATCHED THEN
-			UPDATE SET c.next_display_order = c.next_display_order + 1
-    WHEN NOT MATCHED THEN
-			INSERT (target_type, target_id, next_display_order)
-			VALUES (#{targetType}, #{targetId}, 1)
+	<!-- 행을 비관적 잠금으로 조회 -->
+	<select id="selectForUpdate" resultType="long">
+		SELECT next_display_order
+		FROM image_target_counter
+		WHERE target_type = #{targetType} AND target_id = #{targetId}
+		FOR UPDATE
+	</select>
+	
+	<!-- 카운터 값을 업데이트 -->
+	<update id="updateCounter">
+		UPDATE image_target_counter
+		SET next_display_order = #{nextDisplayOrder}
+		WHERE target_type = #{targetType} AND target_id = #{targetId}
 	</update>
+	
+	<!-- 새로운 카운터 레코드를 생성 -->
+	<insert id="createCounter" parameterType="map">
+		INSERT INTO image_target_counter(target_type, target_id, next_display_order)
+		VALUES (#{targetType}, #{targetId}, #{nextDisplayOrder})
+	</insert>
 	
 </mapper>
