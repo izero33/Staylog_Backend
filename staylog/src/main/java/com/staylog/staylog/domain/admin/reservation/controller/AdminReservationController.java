@@ -3,7 +3,6 @@ package com.staylog.staylog.domain.admin.reservation.controller;
 import com.staylog.staylog.domain.admin.reservation.dto.AdminReservationDto;
 import com.staylog.staylog.domain.admin.reservation.dto.request.AdminReservationListRequest;
 import com.staylog.staylog.domain.admin.reservation.service.AdminReservationService;
-import com.staylog.staylog.domain.admin.user.dto.response.AdminGetUserDetailResponse;
 import com.staylog.staylog.global.common.code.SuccessCode;
 import com.staylog.staylog.global.common.response.SuccessResponse;
 import com.staylog.staylog.global.common.util.MessageUtil;
