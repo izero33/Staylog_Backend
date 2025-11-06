@@ -39,35 +39,41 @@
 
 
 
-    <!-- 4. 예약 내역 (status = upcoming/completed/canceled) -->
+    <!-- 3. 예약 내역 (status = upcoming/completed/canceled) -->
     <select id="selectBookings"
             resultType="BookingInfoResponse">
         SELECT
-            b.booking_id AS bookingId,
-            a.accommodation_name AS accommodationName,
-            r.room_name AS roomName,
-            b.check_in  AS checkIn,
-            b.check_out AS checkOut,
-            b.status    AS status,
-            b.created_at AS createdAt
-        FROM booking b
-        JOIN accommodation a ON a.accommodation_id = b.accommodation_id
-        JOIN room r ON r.room_id = b.room_id
-        WHERE b.user_id = #{userId}
+            r.booking_id AS bookingId,
+            r.booking_num AS bookingNum,
+            a.name AS accommodationName,
+            rm.name AS roomName,
+            r.check_in  AS checkIn,
+            r.check_out AS checkOut,
+            r.status    AS status,
+            r.created_at AS createdAt
+        FROM reservation r
+        	JOIN room rm ON r.room_id = rm.room_id
+	        JOIN accommodation a ON rm.accommodation_id = a.accommodation_id
+        WHERE r.user_id = #{userId}
+        <!-- status 필터는 문자열(upcoming/completed/canceled)로 받되 DB값은 CONFIRMED, CANCELED라서 choose 로 매핑 -->
         <choose>
-            <when test="status == 'upcoming' or status == 'confirmed'">
-                AND b.status = 'CONFIRMED'
-                AND b.check_in &gt; SYSDATE
+        	<!-- 다가올 예약-->
+            <when test="status == 'upcoming'">
+                AND r.status = 'CONFIRMED'
+                AND r.check_in &gt; SYSDATE
             </when>
+            <!-- 이용 완료 -->
             <when test="status == 'completed'">
-                AND b.status = 'CONFIRMED'
-                AND b.check_out &lt; SYSDATE
+                AND r.status = 'CONFIRMED'
+                AND r.check_out &lt; SYSDATE
             </when>
+            <!-- 취소/환불 -->
             <when test="status == 'canceled'">
-                AND b.status = 'CANCELED'
+                AND r.status IN ('CANCELED', 'REFUNDED')
             </when>
+            <!-- status 안보내면 전체 -->
         </choose>
-        ORDER BY b.check_in DESC
+        ORDER BY r.check_in DESC
     </select>
 
     <!-- 5. 리뷰 내역 -->
@@ -108,43 +114,6 @@
             </otherwise>
         </choose>
     </select>
-
-    <!-- 6. 문의 내역 -->
-    <select id="selectInquiries"
-            resultType="InquiryInfoResponse">
-        <choose>
-            <when test="type == 'faq'">
-                SELECT
-                    f.faq_id AS id,
-                    f.question AS question,
-                    f.answer AS answer,
-                    f.category AS category,
-                    f.created_at AS createdAt
-                FROM faq f
-                ORDER BY f.created_at DESC
-            </when>
-            <otherwise>
-                SELECT
-                    i.inquiry_id AS id,
-                    i.title AS title,
-                    i.content AS content,
-                    i.status AS status,
-                    i.created_at AS createdAt
-                FROM inquiry i
-                WHERE i.user_id = #{userId}
-                ORDER BY i.created_at DESC
-            </otherwise>
-        </choose>
-    </select>
-
-    <!-- 7. 1:1 문의 작성 -->
-    <insert id="insertInquiry"
-            parameterType="InquiryWriteRequest"
-            useGeneratedKeys="true" keyProperty="inquiryId">
-        INSERT INTO inquiry (inquiry_id, user_id, title, content, status, created_at)
-        VALUES (seq_inquiry_id.NEXTVAL, #{userId}, #{title}, #{content}, 'WAITING', SYSDATE)
-    </insert>
-
 
 </mapper>
 

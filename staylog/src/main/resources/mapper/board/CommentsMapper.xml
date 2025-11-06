@@ -53,6 +53,13 @@
 		)
 	</insert>
 
+    <!-- 댓글 하나의 정보 가져오기 -->
+    <select id="getOneByCommentId" parameterType="long" resultType="CommentsDto">
+        SELECT *
+        FROM comments
+        WHERE comment_id = #{commentId}
+    </select>
+
 <!-- 시퀀스 생성 comments
 
     CREATE SEQUENCE seq_comments_id

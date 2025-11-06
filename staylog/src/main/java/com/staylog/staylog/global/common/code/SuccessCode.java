@@ -80,7 +80,14 @@ public enum SuccessCode {
 
 	//===================== 환불 관련 성공 (12xxx)=====================
 	REFUND_REQUEST_SUCCESS(201, "S12001", "success.refund.request"),
-	REFUND_PROCESS_SUCCESS(200, "S12002", "success.refund.process");
+	REFUND_PROCESS_SUCCESS(200, "S12002", "success.refund.process"),
+  
+  // ==================== 쿠폰 관련 성공 (13xxx) ====================
+  COUPON_LIST_FIND(200, "S13001", "success.coupon.list.find"),
+  COUPON_CREATE(201, "S13002", "success.coupon.created"),
+  COUPON_USED(201, "S13003", "success.coupon.used"),
+  COUPON_DELETED(201, "S13004", "success.coupon.deleted");
+
 
 
     private final int httpStatus;

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staylog.staylog.domain.coupon.mapper.CouponMapper">
+
+    <!-- 특정 유저의 사용 가능한 모든 쿠폰 조회 -->
+    <select id="getAvailableCouponList" parameterType="long" resultType="couponResponse">
+        SELECT *
+        FROM coupon
+        WHERE user_id = #{userID} AND is_used = 'N' AND (expired_at IS NULL OR expired_at > SYSTIMESTAMP)
+        ORDER BY expired_at ASC
+    </select>
+
+    <!-- 특정 유저의 사용 불가능한 모든 쿠폰 조회 -->
+    <select id="getUnavailableCouponList" parameterType="long" resultType="couponResponse">
+        <![CDATA[
+        SELECT *
+        FROM coupon
+        WHERE user_id = #{userID} AND (is_used = 'Y' OR (expired_at IS NOT NULL AND expired_at <= SYSTIMESTAMP))
+        ORDER BY expired_at ASC
+        ]]>
+    </select>
+
+    <!-- 쿠폰 발급 -->
+    <insert id="saveCoupon" parameterType="couponRequest">
+        <selectKey keyProperty="couponId" resultType="long" order="BEFORE">
+            SELECT seq_coupon_id.NEXTVAL
+            FROM DUAL
+        </selectKey>
+        INSERT INTO coupon(coupon_id, user_id, name, discount, expired_at)
+        VALUES(#{couponId}, #{userId}, #{name}, #{discount}, #{expiredAt})
+    </insert>
+
+    <!-- 모든 유저에게 쿠폰 발급 -->
+    <insert id="saveCouponToAllUsers" parameterType="couponBatchRequest">
+        INSERT INTO coupon(coupon_id, user_id, name, discount, expired_at)
+        SELECT seq_coupon_id.NEXTVAL, user_id, #{name}, #{discount}, #{expiredAt}
+        FROM users
+    </insert>
+
+    <!-- 쿠폰 사용 가능 여부 확인 -->
+    <select id="checkAvailableCoupon" parameterType="long" resultType="couponCheckDto">
+        SELECT is_used, expired_at
+        FROM coupon
+        WHERE coupon_id = #{couponId}
+    </select>
+
+
+    <!-- 쿠폰 사용처리 -->
+    <update id="useCoupon" parameterType="long">
+        UPDATE coupon
+        SET is_used = 'Y', used_at = SYSTIMESTAMP
+        WHERE coupon_id = #{couponId} AND is_used = 'N' AND (expired_at IS NULL OR expired_at > SYSTIMESTAMP)
+    </update>
+
+    <!-- 쿠폰 미사용처리 -->
+    <update id="unuseCoupon" parameterType="long">
+        UPDATE coupon
+        SET is_used = 'N', used_at = SYSTIMESTAMP
+        WHERE coupon_id = #{couponId}
+    </update>
+
+    <!-- 쿠폰 삭제 -->
+    <delete id="deleteCoupon" parameterType="long">
+        DELETE FROM coupon
+        WHERE coupon_id = #{couponId}
+    </delete>
+
+</mapper>

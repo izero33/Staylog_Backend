@@ -110,8 +110,14 @@ public enum ErrorCode {
     REFUND_POLICY_VIOLATION(HttpStatus.BAD_REQUEST, "E12002", "error.refund.policy.violation"),
     REFUND_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "E12003", "error.refund.already.processed"),
     REFUND_AMOUNT_INVALID(HttpStatus.BAD_REQUEST, "E12004", "error.refund.amount.invalid"),
-    TOSS_REFUND_API_ERROR(HttpStatus.BAD_GATEWAY, "E12005", "error.refund.toss.api");
+    TOSS_REFUND_API_ERROR(HttpStatus.BAD_GATEWAY, "E12005", "error.refund.toss.api"),
 
+
+    // ==================== 쿠폰 관련 에러 (13xxx) ====================
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "E13001", "error.coupon.not.found"),
+    COUPON_FAILED_USED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.used"),
+    COUPON_FAILED_CREATED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.created"),
+    COUPON_FAILED_DELETED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.deleted");
 
     private final HttpStatus status;
     private final String code;

@@ -119,8 +119,7 @@ jobs:
             docker run -d --name "${{ env.CONTAINER_NAME }}" \
               --network "${{ env.NETWORK_NAME }}" \
               -p "${{ env.APP_PORT }}:${{ env.APP_PORT }}" \
-              -v /home/ec2-user/upload/images:/usr/upload/images \
-              -v /home/ec2-user/upload/files:/usr/upload/files \
+              -v /home/ec2-user/upload:/usr/upload \
               -e SPRING_PROFILES_ACTIVE="${{ env.SPRING_PROFILES_ACTIVE }}" \
               -e SERVER_PORT="${{ env.SERVER_PORT }}" \
               -e DB_DRIVER="${{ env.DB_DRIVER }}" \

@@ -51,7 +51,7 @@ public class SseServiceImpl implements SseService {
                     .data("Connected! (userId: " + userId + ")"));
         } catch (IOException e) {
             log.warn("알림 채널 구독 실패 - userId={}", userId);
-            throw new BusinessException(ErrorCode.NOTIFICATION_SUBSCRIBE_FAILED);
+            emitter.completeWithError(e);
         }
 
         return emitter;
@@ -68,6 +68,8 @@ public class SseServiceImpl implements SseService {
      */
     @Override
     public void sendNotification(Long userId, NotificationResponse notificationResponse) {
+        
+        // Map에서 해당 유저의 emitter를 꺼내기
         SseEmitter emitter = emitters.get(userId);
 
         if (emitter != null) {
@@ -80,6 +82,7 @@ public class SseServiceImpl implements SseService {
                 emitters.remove(userId);
                 log.warn("유효하지 않은 Emitter - userId={}", userId);
                 // 여기서 throw를 던지면 롤백 발생하므로 X
+                // TODO: 이벤트 리스너로 분리해서 이제 throw를 던져도 될 듯(확인 필요)
                 // throw new BusinessException(ErrorCode.NOTIFICATION_EMITTER_NOT_FOUND);
             }
         }

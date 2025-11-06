@@ -37,9 +37,10 @@
     </select>
     
     <!-- 해당 카테고리 게시판 목록 조회 (삭제된 게시글 제외) -->
-    <select id="getByBoardType" parameterType="BoardDto" resultType="BoardDto">
+    <select id="getByBoardType" parameterType="BoardListRequest" resultType="BoardDto">
         SELECT b.board_type AS boardType,
-            c.code_name AS regionName,
+            b.region_code AS regionCode,
+            cc.code_name AS regionName,
             b.board_id AS boardId,
             b.accommodation_id AS accommodationId,
             a.name AS accommodationName,
@@ -47,37 +48,53 @@
             b.user_id AS userId,
             u.nickname AS userNickName,
             b.title,
-            b.likes_count,
             b.rating,
             b.views_count,
             TO_CHAR(b.created_at, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
             TO_CHAR(b.updated_at, 'YYYY-MM-DD HH24:MI:SS') AS updatedAt,
+            COUNT(l.like_id) AS likes,
             b.deleted
         FROM board b
         JOIN accommodation a
             ON b.accommodation_id = a.accommodation_id
-        LEFT JOIN common_code c
-            ON b.region_code = c.code_id
-            AND c.parent_id = 'REGION_TYPE'
         LEFT JOIN users u
             ON b.user_id = u.user_id
+        LEFT JOIN common_code cc
+            ON b.region_code = cc.code_id
+        LEFT JOIN likes l
+            ON b.board_id = l.board_id
+
         WHERE
             b.deleted = 'N'
             AND b.board_type = #{boardType}
 
-<!--            &lt;!&ndash; 지역 필터 &ndash;&gt;-->
-<!--            <if test="regionCode != null and regionCode != ''">-->
-<!--                And b.region_code = #{regionCode}-->
-<!--            </if>-->
+            <!-- 지역 필터 (다중) -->
+            <if test="regionCodes != null and !regionCodes.isEmpty()">
+                AND b.region_code IN
+                <foreach collection="regionCodes" item="code" open="(" separator="," close=")">
+                    #{code}
+                </foreach>
+            </if>
 
-<!--            &lt;!&ndash; 키워드 검색 &ndash;&gt;-->
-<!--            <if test="keyword != null and keyword !=''">-->
-<!--                AND (b.title LIKE '%' || #{keyword} || '%'-->
-<!--                    OR b.content LIKE '%' || #{keyword} || '%')-->
-<!--            </if>-->
+        GROUP BY
+            b.board_type, b.region_code, cc.code_name, b.board_id,
+            b.accommodation_id, a.name, b.booking_id, b.user_id, u.nickname,
+            b.title, b.rating, b.views_count, b.created_at, b.updated_at, b.deleted
 
-<!--        ORDER BY b.created_at DESC-->
-<!--        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY-->
+
+        <!-- 정렬 옵션 -->
+        <choose>
+            <when test="sort == 'likes'">
+                ORDER BY b.likes_count DESC
+            </when>
+            <when test="sort == 'views'">
+                ORDER BY b.views_count DESC
+            </when>
+            <otherwise>
+                ORDER BY b.created_at DESC
+            </otherwise>
+        </choose>
+
     </select>
 
 
@@ -97,8 +114,8 @@
             b.content,
             b.rating,
             b.views_count AS viewsCount,
-            TO_CHAR(b.created_at, 'YYYY-MM-DD HH24:MI:SS'),
-            TO_CHAR(b.updated_at, 'YYYY-MM-DD HH24:MI:SS'),
+            TO_CHAR(b.created_at, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
+            TO_CHAR(b.updated_at, 'YYYY-MM-DD HH24:MI:SS') AS updatedAt,
             b.deleted,
             (
                 SELECT NVL(COUNT(*), 0)
@@ -108,10 +125,10 @@
         FROM board b
         JOIN users u
             ON b.user_id = u.user_id
-        LEFT JOIN likes l
-            ON b.board_id = l.board_id
         WHERE b.board_id = #{boardId}
     </select>
+
+
         
     <!-- 게시글 수정 -->
     <update id="update" parameterType="BoardDto">
@@ -164,6 +181,48 @@
     </select>
 
 
+    <!-- 게시글 PK로 작성자 PK 조회(알림에서 사용할 목적) -->
+    <select id="getUserIdByBoardId" parameterType="long" resultType="long">
+        SELECT user_id
+        FROM board
+        WHERE board_id = #{boardId}
+    </select>
+
+
+
+    <!-- 좋아요 update / +1 / -1 -->
+    <update id="updateLikeCount" parameterType="long">
+        UPDATE board b SET b.likes_count = (
+            SELECT COUNT(*)
+            FROM likes l
+            WHERE l.board_id = b.board_id
+        )
+        WHERE b.board_id = #{boardId}
+    </update>
+
+    <update id="increaseLikeCount" parameterType="long">
+        UPDATE board SET likes_count = likes_count + 1
+        WHERE board_id = #{boardId}
+    </update>
+
+    <update id="decreaseLikeCount" parameterType="long">
+        UPDATE board SET likes_count = likes_count - 1
+        WHERE board_id = #{boardId}
+    </update>
+
+    <update id="increaseViewsCount" parameterType="long">
+        UPDATE board SET views_count = views_count + 1
+        WHERE board_id = #{boardId}
+    </update>
+
+
+    <!-- 게시글 PK로 숙소명 조회 (알림에서 사용) -->
+    <select id="getAccommodationNameByBoardId" parameterType="long" resultType="String">
+        SELECT a.name
+        FROM accommodation a JOIN board b ON a.accommodation_id = b.accommodation_id
+        WHERE b.board_id = #{boardId}
+    </select>
+
 
 <!-- 시퀀스 생성 board
 
@@ -179,7 +238,7 @@
     CREATE TABLE board (
         board_id           NUMBER PRIMARY KEY,
         accommodation_id   NUMBER NOT NULL,
-        booking_id         NUMBER NOT NULL,
+        booking_id         NUMBER ,
         user_id            NUMBER NOT NULL,
 
         region_code        VARCHAR2(20) NOT NULL,
