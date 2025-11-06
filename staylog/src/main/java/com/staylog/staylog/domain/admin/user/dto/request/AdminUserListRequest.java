@@ -12,7 +12,4 @@ public class AdminUserListRequest extends PageRequest {
         private String role; // 권한
         private String status; // 상태
 
-        public int getStartRow() { return super.getStartRow(); }
-        public int getEndRow()   { return super.getEndRow(); }
-
 }

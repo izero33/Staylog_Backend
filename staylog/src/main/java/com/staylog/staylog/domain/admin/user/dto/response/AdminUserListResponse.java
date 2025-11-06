@@ -18,5 +18,5 @@ public class AdminUserListResponse {
     // 목록 조회용 필드
     private List<AdminUserListDto> users;
     // 페이징 처리용
-    private PageResponse pageInfo;
+    private PageResponse page;
 }

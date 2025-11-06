@@ -33,7 +33,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
         AdminUserListResponse resp = new AdminUserListResponse();
-        resp.setPageInfo(page);
+        resp.setPage(page);
         resp.setUsers(users);
 
         return resp;
