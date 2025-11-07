@@ -5,6 +5,10 @@ import org.apache.ibatis.type.Alias;
 
 import java.time.LocalDate;
 
+/**
+ * 쿠폰 발급에 사용하는 Dto
+ * @author 이준혁
+ */
 @Alias("couponRequest")
 @Setter
 @Getter
