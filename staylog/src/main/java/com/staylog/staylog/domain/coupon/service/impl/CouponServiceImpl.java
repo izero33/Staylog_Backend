@@ -131,7 +131,7 @@ public class CouponServiceImpl implements CouponService {
      * @author 이준혁
      */
     @TransactionalEventListener
-    private void useCoupon(PaymentConfirmEvent event) {
+    private void handlePaymentEvent(PaymentConfirmEvent event) {
 
         long couponId = event.getCouponId();
         CouponCheckDto couponCheckDto = couponMapper.checkAvailableCoupon(couponId);
