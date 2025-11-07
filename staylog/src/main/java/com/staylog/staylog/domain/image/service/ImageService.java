@@ -1,6 +1,8 @@
 package com.staylog.staylog.domain.image.service;
 
-import com.staylog.staylog.domain.image.dto.ImageServeDto;
+import com.staylog.staylog.domain.image.dto.ImageDto;
+import com.staylog.staylog.domain.image.dto.ImageDto;
+import com.staylog.staylog.domain.image.dto.ImageResponse;
 import com.staylog.staylog.domain.image.dto.ImageUpdateRequest;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +14,7 @@ import java.util.List;
  * @author 고윤제
  */
 public interface ImageService {
-    List<ImageServeDto> saveImages(List<MultipartFile> files, String targetType, long targetId);
+    ImageResponse saveImages(List<MultipartFile> files, String targetType, long targetId);
     void deleteImage(long imageId);
     /**
      * 지정된 target 에 속한 모든 이미지 일괄 삭제
@@ -26,9 +28,10 @@ public interface ImageService {
     * @param files 새로 추가할 이미지 파일 목록
     */
     void updateImages(ImageUpdateRequest request, List<MultipartFile> files);
-    List<ImageServeDto> getImagesByTarget(String targetType, long targetId);
+    ImageResponse getImagesByTarget(String targetType, long targetId);
     
     
     //정나영
     Long getBoardId();
+
 }

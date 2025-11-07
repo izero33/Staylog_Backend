@@ -1,7 +1,8 @@
 package com.staylog.staylog.domain.image.service.impl;
 
+import com.staylog.staylog.domain.image.dto.ImageData;
 import com.staylog.staylog.domain.image.dto.ImageDto;
-import com.staylog.staylog.domain.image.dto.ImageServeDto;
+import com.staylog.staylog.domain.image.dto.ImageResponse;
 import com.staylog.staylog.domain.image.dto.ImageUpdateItemDto;
 import com.staylog.staylog.domain.image.dto.ImageUpdateRequest;
 import com.staylog.staylog.domain.image.mapper.ImageMapper;
@@ -46,7 +47,7 @@ public class ImageServiceImpl implements ImageService {
     
     @Override
     @Transactional
-    public List<ImageServeDto> saveImages(List<MultipartFile> files, String targetType, long targetId){
+    public ImageResponse saveImages(List<MultipartFile> files, String targetType, long targetId){
     	log.info("ImageService.saveImages 호출됨 - targetType: {}, targetId: {}", targetType, targetId);
     	String prefixedTargetType = "IMG_FROM_"+targetType;
         if (files == null || files.isEmpty()) {
@@ -97,17 +98,17 @@ public class ImageServiceImpl implements ImageService {
             newImages.add(imageDto);
         }
         
-        // 새로 업로드된 ImageDto 리스트를 ImageServeDto 리스트로 변환하여 반환.
-        return convertToImageServeDtoList(newImages);
+        // 새로 업로드된 ImageDto 리스트를 ImageResponse 리스트로 변환하여 반환.
+        return buildImageResponse(targetType, targetId, newImages);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ImageServeDto> getImagesByTarget(String targetType, long targetId) {
+    public ImageResponse getImagesByTarget(String targetType, long targetId) {
     	String prefixedTargetType = "IMG_FROM_"+targetType;
         List<ImageDto> images = imageMapper.selectImagesByTarget(prefixedTargetType, targetId);
         
-        return convertToImageServeDtoList(images);
+        return buildImageResponse(targetType, targetId, images);
     }
 
 	
@@ -288,30 +289,6 @@ public class ImageServiceImpl implements ImageService {
 		return imageId;
 	}
 	
-	/**
-	 * ImageDto 리스트를 프론트 전달용 ImageServeDto 리스트로 변환
-	 * 이 과정에서 targetType의 'IMG_FROM_' 접두사 제거.
-	 * 
-	 */
-	private List<ImageServeDto> convertToImageServeDtoList(List<ImageDto> imageDtos) {
-		List<ImageServeDto> imagesServe = new ArrayList<>();
-		for (ImageDto image : imageDtos) {
-			String cleanTargetType = image.getTargetType();
-			if (cleanTargetType != null && cleanTargetType.startsWith("IMG_FROM_")) {
-				cleanTargetType = cleanTargetType.substring("IMG_FROM_".length());
-			}
-			ImageServeDto imageServeDto = ImageServeDto.builder()
-					.imageId(image.getImageId())
-					.imageUrl("/images/" + image.getSavedUrl())
-					.targetType(cleanTargetType)
-					.targetId(image.getTargetId())
-					.displayOrder(image.getDisplayOrder())
-					.build();
-			imagesServe.add(imageServeDto);
-		}
-		
-		return imagesServe;
-	}
 	
 	/**
 	 * 필요한 개수(count)만큼의 displayOrder 범위를 예약하고, 시작 번호를 반환.
@@ -352,4 +329,27 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param targetType
+	 * @param targetId
+	 * @param imageDtos
+	 * @return
+	 */
+	private ImageResponse buildImageResponse(String targetType, long targetId, List<ImageDto> imageDtos) {
+		List<ImageData> imageDataList = imageDtos.stream()
+			.map(image -> ImageData.builder()
+	            .imageId(image.getImageId())
+	            .imageUrl("/images/" + image.getSavedUrl())
+	            .displayOrder(image.getDisplayOrder())
+	            .build())
+			.collect(Collectors.toList());
+		
+		return ImageResponse.builder()
+	        .targetType(targetType)
+	        .targetId(targetId)
+	        .images(imageDataList)
+	        .build();
+	}
+
 }
