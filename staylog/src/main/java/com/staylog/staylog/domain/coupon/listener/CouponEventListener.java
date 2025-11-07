@@ -6,6 +6,7 @@ import com.staylog.staylog.domain.coupon.mapper.CouponMapper;
 import com.staylog.staylog.domain.coupon.service.CouponService;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.event.PaymentConfirmEvent;
+import com.staylog.staylog.global.event.ReviewCreatedEvent;
 import com.staylog.staylog.global.event.SignupEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,26 @@ public class CouponEventListener {
 
 
     /**
-     * 회원가입 이벤트리스너 메서드
+     * 리뷰글 작성 이벤트리스너 메서드(리뷰 쿠폰 발급)
+     * @param event 이벤트 객체
+     * @author 이준혁
+     */
+    @TransactionalEventListener
+    private void handleReviewCreatedEvent(ReviewCreatedEvent event) {
+
+        CouponRequest couponRequest = CouponRequest.builder()
+                .userId(event.getUserId())
+                .name("리뷰 쿠폰")
+                .discount(5)
+                .expiredAt(LocalDate.now().plusDays(30)) // 30일 후 만료
+                .build();
+
+        couponService.saveCoupon(couponRequest);
+    }
+
+
+    /**
+     * 회원가입 이벤트리스너 메서드(환영 쿠폰 발급)
      * @param event 이벤트 객체
      * @author 이준혁
      */
@@ -45,13 +65,13 @@ public class CouponEventListener {
 
 
     /**
-     * 쿠폰 사용 처리 이벤트리스너 메서드
+     * 결제완료 이벤트리스너 메서드(쿠폰 사용 처리)
      *
      * @param event 결제 이벤트 객체
      * @author 이준혁
      */
     @TransactionalEventListener
-    private void handlePaymentEvent(PaymentConfirmEvent event) {
+    private void handlePaymentConfirmEvent(PaymentConfirmEvent event) {
 
         long couponId = event.getCouponId();
         CouponCheckDto couponCheckDto = couponMapper.checkAvailableCoupon(couponId);
@@ -70,4 +90,7 @@ public class CouponEventListener {
             throw new BusinessException(ErrorCode.COUPON_FAILED_USED);
         }
     }
+    
+    
+    // TODO: 결제 취소 시 쿠폰 미사용 처리 리스너 구현 필요
 }

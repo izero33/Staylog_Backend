@@ -14,6 +14,7 @@ import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,11 +41,12 @@ public class NotificationServiceImpl implements NotificationService {
      * @author 이준혁
      */
     @Override
+    @Transactional
     public void saveNotification(NotificationRequest notificationRequest, DetailsResponse detailsResponse) {
 
         // DB 저장
         int success = notificationMapper.notiSave(notificationRequest);
-
+        // TODO: 리뷰글 작성 -> 쿠폰 발급 -> 알림 전송 로직에서 알림 저장이 안됨
         if (success == 1) {
             // 클라이언트에게 SSE로 푸시하기위한 객체 구성
             NotificationResponse notificationResponse = NotificationResponse.builder()

@@ -87,7 +87,6 @@ public class CouponServiceImpl implements CouponService {
         // =========== 쿠폰 발급 이벤트 발행(알림 전송) ==============
         CouponCreatedEvent event = new CouponCreatedEvent(couponRequest.getCouponId(), couponRequest.getUserId(), couponRequest.getName(), couponRequest.getDiscount());
         eventPublisher.publishEvent(event);
-
     }
 
     /**

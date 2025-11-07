@@ -15,7 +15,9 @@ import com.staylog.staylog.global.event.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import com.staylog.staylog.global.event.CouponCreatedEvent;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +43,7 @@ public class NotificationEventListener {
      * @param event 쿠폰 발급 이벤트 객체
      * @author 이준혁
      */
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     private void handleCouponCreatedEvent(CouponCreatedEvent event) {
         long recipientId = event.getUserId(); // 수신자 PK
 
@@ -70,7 +72,8 @@ public class NotificationEventListener {
             notificationService.saveNotification(notificationRequest, detailsResponse);
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
+//            throw new RuntimeException(e);
         }
     }
 
@@ -207,7 +210,8 @@ public class NotificationEventListener {
             notificationService.saveNotification(notificationRequest, detailsResponse);
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
+//            throw new RuntimeException(e);
         }
     }
 
