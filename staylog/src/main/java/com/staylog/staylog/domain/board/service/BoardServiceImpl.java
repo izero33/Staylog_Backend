@@ -57,7 +57,8 @@ public class BoardServiceImpl implements BoardService {
     // 게시글 상세보기
     @Override
     public BoardDto getByBoardId(long boardId) {
-
+        boardMapper.updateLikeCount(boardId);
+        boardMapper.updateViewsCount(boardId);
         return boardMapper.getByBoardId(boardId);
     }
 
