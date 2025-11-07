@@ -270,13 +270,14 @@ public class NotificationEventListener {
     private void handleSignupEvent(SignupEvent event) {
 
         long recipientId = event.getUserId();
+        String nickname = userMapper.findNicknameByUserId(recipientId);
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
                 .imageUrl("https://picsum.photos/id/10/200/300")
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .title("회원가입을 축하합니다!")
-                .message("웰컴 쿠폰이 발급되었습니다.")
+                .title(nickname + "님!")
+                .message("회원가입을 축하합니다!")
                 .typeName("Signup")
                 .build();
 

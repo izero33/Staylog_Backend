@@ -30,14 +30,14 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     /**
-     * 알림 데이터 저장 및 푸시
+     * 알림 데이터 저장
      *
      * @param notificationRequest 알림 데이터 + JSON 형태의 String Type 데이터
      * @param detailsResponse     반복적인 직렬화, 역직렬화를 막기 위한 온전한 Details 객체(프론트에 그대로 출력 가능)
      * @apiNote 알림 별로 필요한 상세데이터는 해당하는 이벤트리스너에서
      * JSON 형식으로 각 타입별 데이터에 맞게 notificationRequest.details 필드에 담아 가져온다.
      * notificationRequest를 사용해서 DB에 저장 후 details 필드의 값을 사용해,
-     * NotificationResponse를 구성하여 사용자에게 PUSH한다.
+     * NotificationResponse를 구성하여 SSE에 전달한다.
      * @author 이준혁
      */
     @Override
@@ -46,7 +46,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         // DB 저장
         int success = notificationMapper.notiSave(notificationRequest);
-        // TODO: 리뷰글 작성 -> 쿠폰 발급 -> 알림 전송 로직에서 알림 저장이 안됨
         if (success == 1) {
             // 클라이언트에게 SSE로 푸시하기위한 객체 구성
             NotificationResponse notificationResponse = NotificationResponse.builder()
