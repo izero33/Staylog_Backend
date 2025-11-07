@@ -1,6 +1,7 @@
 package com.staylog.staylog.domain.admin.reservation.service.impl;
 
 
+import com.staylog.staylog.domain.admin.reservation.dto.AdminMonthlyStatsDto;
 import com.staylog.staylog.domain.admin.reservation.dto.AdminReservationDto;
 import com.staylog.staylog.domain.admin.reservation.dto.request.AdminReservationListRequest;
 import com.staylog.staylog.domain.admin.reservation.dto.response.AdminReservationListResponse;
@@ -59,4 +60,12 @@ public class AdminReservationServiceImpl implements AdminReservationService {
     public int getTotalCount(AdminReservationListRequest req) {
         return mapper.countReservations(req);
     }
+
+    @Override
+    public AdminMonthlyStatsDto getMonthlyStats() {
+        AdminMonthlyStatsDto dto = mapper.getMonthlyStats();
+        return dto != null ? dto : new AdminMonthlyStatsDto(0, 0, 0, 0L);
+    }
+
+
 }

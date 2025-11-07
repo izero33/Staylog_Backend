@@ -1,5 +1,6 @@
 package com.staylog.staylog.domain.admin.reservation.controller;
 
+import com.staylog.staylog.domain.admin.reservation.dto.AdminMonthlyStatsDto;
 import com.staylog.staylog.domain.admin.reservation.dto.AdminReservationDto;
 import com.staylog.staylog.domain.admin.reservation.dto.request.AdminReservationListRequest;
 import com.staylog.staylog.domain.admin.reservation.dto.response.AdminReservationListResponse;
@@ -53,6 +54,18 @@ public class AdminReservationController {
         String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
         String code = SuccessCode.SUCCESS.name();
         SuccessResponse<AdminReservationDto> success = SuccessResponse.of(code, message, detail);
+        return ResponseEntity.ok(success);
+    }
+
+    /**
+     * 매출 요약
+     */
+    @GetMapping("/admin/reservations/stats/monthly")
+    public ResponseEntity<SuccessResponse<AdminMonthlyStatsDto>> getMonthlyStats() {
+        AdminMonthlyStatsDto stats = reservationService.getMonthlyStats();
+        String message = messageUtil.getMessage(SuccessCode.SUCCESS.getMessageKey());
+        String code = SuccessCode.SUCCESS.name();
+        SuccessResponse<AdminMonthlyStatsDto> success = SuccessResponse.of(code, message, stats);
         return ResponseEntity.ok(success);
     }
 
