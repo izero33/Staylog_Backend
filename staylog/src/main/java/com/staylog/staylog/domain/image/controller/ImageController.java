@@ -51,13 +51,6 @@ public class ImageController {
         return ResponseEntity.ok(success);
     }
     
-    @Operation(summary = "단일 이미지 업로드", description = "단일 이미지를 저장합니다")
-    @PostMapping("/profile/upload")
-    public ResponseEntity<SuccessResponse<String>> saveProfileImage(MultipartFile file, @RequestParam("userId") Long userId){
-    	
-    	return null;
-    }
-    
     @Operation(summary = "단일 이미지 삭제", description = "단일 이미지 삭제, 삭제하면서 displayOrder를 앞당김")
     @DeleteMapping("/images/{imageId}")
     public ResponseEntity<SuccessResponse<Void>> deleteImage(@PathVariable long imageId) {
