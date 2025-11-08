@@ -122,10 +122,6 @@
 
 	<!-- 객실 추가 -->
 	<insert id="insertRoom" parameterType="AdminRoomRequest">
-	    <selectKey keyProperty="roomId" resultType="long" order="BEFORE">
-	        SELECT seq_room_id.NEXTVAL FROM DUAL
-	    </selectKey>
-
 	    INSERT INTO room (
 	        room_id, accommodation_id, name, rm_type,
 	        price, max_adult, max_children, max_infant,
@@ -138,7 +134,7 @@
 	        TO_TIMESTAMP(#{checkIn}, 'HH24:MI'),
 	        TO_TIMESTAMP(#{checkOut}, 'HH24:MI'),
 	        #{area},
-	        #{singleBed}, #{doubleBed}, #{queenBed}, #{kingBed}, #{description}
+	        #{singleBed}, #{doubleBed}, #{queenBed}, #{kingBed}, #{description},
 	        SYSTIMESTAMP
 	    )
 	</insert>

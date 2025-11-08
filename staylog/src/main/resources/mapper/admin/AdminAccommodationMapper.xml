@@ -130,10 +130,6 @@
 	
 	<!-- 숙소 등록 -->
 	<insert id="insertAccommodation" parameterType="AdminAccommodationRequest">
-	    <selectKey keyProperty="accommodationId" resultType="long" order="BEFORE">
-	        SELECT seq_accommodation_id.NEXTVAL FROM DUAL
-	    </selectKey>
-	    
 	    INSERT INTO accommodation (
 	        accommodation_id, name, description,
 	        ac_type, region_code, 

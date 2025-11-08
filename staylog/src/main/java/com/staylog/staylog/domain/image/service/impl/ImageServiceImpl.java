@@ -342,6 +342,7 @@ public class ImageServiceImpl implements ImageService {
 	            .imageId(image.getImageId())
 	            .imageUrl("/images/" + image.getSavedUrl())
 	            .displayOrder(image.getDisplayOrder())
+	            .originalName(image.getOriginalName())
 	            .build())
 			.collect(Collectors.toList());
 		

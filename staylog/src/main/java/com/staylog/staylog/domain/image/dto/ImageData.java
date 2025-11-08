@@ -9,4 +9,5 @@ public class ImageData {
 	private long imageId;
 	private String imageUrl;
 	private long displayOrder;
+	private String originalName;
 }

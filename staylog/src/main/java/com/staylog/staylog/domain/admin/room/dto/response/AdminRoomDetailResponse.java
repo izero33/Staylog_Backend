@@ -69,6 +69,9 @@ public class AdminRoomDetailResponse {
     /** 킹 베드 수 */
     private Integer kingBed;
 
+    /** 객실 설명 */
+    private String description;
+    
     /** 생성일시 */
     private String createdAt;
     /** 수정일시 */
