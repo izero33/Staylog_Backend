@@ -95,7 +95,7 @@ public class ImageController {
     @PutMapping("/images")
     public ResponseEntity<SuccessResponse<Void>> updateImages(@RequestPart("request") ImageUpdateRequest request,
 										@RequestPart(value = "files", required = false) List<MultipartFile> files){
-    	// imageService.updateImages(request, files); // 서비스 메소드 호출
+    	imageService.updateImages(request, files); // 서비스 메소드 호출
     	
     	// 임시 성공 응답
 	    String message = "이미지 목록이 성공적으로 업데이트되었습니다."; // 임시 메시지
