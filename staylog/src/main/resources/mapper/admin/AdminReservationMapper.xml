@@ -91,6 +91,7 @@
         r.guest_name,
         u.name  AS user_name,
         u.email AS user_email,
+        u.phone AS phone,
         a.name  AS accommodation_name,
         rm.name AS room_name,
         r.check_in,
@@ -114,7 +115,7 @@
         WHERE r.booking_id = #{bookingId}
     </select>
 
-    <!-- 예약 상태 변경 -->
+    <!-- 예약 상태 변경 (미 사용) -->
     <update id="updateReservationStatus" parameterType="map">
         UPDATE reservation
         SET status = #{status},
@@ -138,19 +139,18 @@
     <!-- 이번 달 예약/매출 요약 -->
     <select id="getMonthlyStats"
             resultType="com.staylog.staylog.domain.admin.reservation.dto.AdminMonthlyStatsDto">
-        SELECT
+        <![CDATA[
+    SELECT
         COUNT(1) AS totalCount,
         SUM(CASE WHEN status IN ('RES_CONFIRM','RES_CONFIRMED') THEN 1 ELSE 0 END) AS confirmedCount,
-        SUM(CASE WHEN status IN ('RES_CANCEL','RES_CANCELED','RES_CANCELLED') THEN 1 ELSE 0 END) AS canceledCount,
-        NVL(SUM(
-        CASE WHEN status IN ('RES_CONFIRM','RES_CONFIRMED')
-        THEN NVL(final_amount, 0)
-        ELSE 0
-        END
-        ), 0) AS monthlyRevenue
-        FROM reservation
-        WHERE created_at >= TRUNC(SYSDATE, 'MM')
-        AND created_at &lt;  ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+        /* 환불 상태 포함 */
+        SUM(CASE WHEN status IN ('RES_CANCEL','RES_CANCELED','RES_CANCELLED','RES_REFUNDED') THEN 1 ELSE 0 END) AS canceledCount,
+        /* 매출은 확정만 합산 */
+        NVL(SUM(CASE WHEN status IN ('RES_CONFIRM','RES_CONFIRMED') THEN NVL(final_amount, 0) ELSE 0 END), 0) AS monthlyRevenue
+    FROM reservation
+    WHERE created_at >= TRUNC(SYSDATE, 'MM')
+        AND created_at <  ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+       ]]>
     </select>
 
 </mapper>

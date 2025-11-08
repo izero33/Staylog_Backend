@@ -18,6 +18,7 @@ public class AdminReservationDto {
     private String userName;         // 회원 이름 (JOIN 필요)
     private String accommodationName;// 숙소명 (JOIN 필요)
     private String roomName;         // 객실명 (JOIN 필요)
+    private String phone; // 전화번호
     private LocalDateTime checkIn;       // 체크인
     private LocalDateTime checkOut;      // 체크아웃
     private Integer adults;          // 성인 수

@@ -71,6 +71,7 @@
                email,
                phone,
                role,
+                nickname,
                status,
                gender,
                birth_date,
