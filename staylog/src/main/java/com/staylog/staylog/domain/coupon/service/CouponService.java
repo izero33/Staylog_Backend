@@ -65,16 +65,16 @@ public interface CouponService {
      */
     public CouponDiscountResult validateAndCalculateDiscount(Long userId, Long couponId, Long originalAmount);
 
-    /**
-     * 쿠폰 사용 처리 (결제 승인 성공 시 호출)
-     * - is_used = 'Y'
-     * - used_at = 현재 시간
-     *
-     * @param couponId 쿠폰 ID
-     * @throws BusinessException 쿠폰 사용 처리 실패 시
-     * @author danjae
-     */
-    public void applyCouponUsage(Long couponId);
+//    /**
+//     * 쿠폰 사용 처리 (결제 승인 성공 시 호출)
+//     * - is_used = 'Y'
+//     * - used_at = 현재 시간
+//     *
+//     * @param couponId 쿠폰 ID
+//     * @throws BusinessException 쿠폰 사용 처리 실패 시
+//     * @author danjae
+//     */
+//    public void applyCouponUsage(Long couponId);
 
     /**
      * 쿠폰 복구 처리 (결제 실패/취소 시 호출)

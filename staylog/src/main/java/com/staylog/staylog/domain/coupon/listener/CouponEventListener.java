@@ -67,11 +67,13 @@ public class CouponEventListener {
 
     /**
      * 결제완료 이벤트리스너 메서드
-     * @apiNote 결제 트랜잭션에 포함시키기 위해 BEFORE_COMMIT를 사용해서 결제와 쿠폰 사용의 원자성 보장
      * @author 이준혁
      * @param event 결제 이벤트 객체
      */
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    // 결제 트랜잭션에 포함시키기 위해 BEFORE_COMMIT를 사용해서 결제와 쿠폰 사용의 원자성 보장하려 했으나
+    // 쿠폰 사용이 실패해도 결제는 완료되는 것이 비즈니스 로직상 더 올바른 구조
+    // TODO: @Retryable로 쿠폰 사용이 실패하더라도 재시도하도록 수정 필요
+    @TransactionalEventListener
     private void handlePaymentConfirmEvent(PaymentConfirmEvent event) {
 
         long couponId = event.getCouponId();

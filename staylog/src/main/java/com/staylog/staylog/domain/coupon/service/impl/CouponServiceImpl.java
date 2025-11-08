@@ -218,27 +218,29 @@ public class CouponServiceImpl implements CouponService {
         return Math.round(discountAmount);
     }
 
-    /**
-     * 쿠폰 사용 처리
-     * - PaymentService에서 결제 승인 성공 시 호출
-     * - is_used = 'Y', used_at = 현재 시간
-     *
-     * @param couponId 쿠폰 ID
-     * @author danjae
-     */
-    @Override
-    @Transactional
-    public void applyCouponUsage(Long couponId) {
-        log.info("쿠폰 사용 처리 시작: couponId={}", couponId);
-
-        int updated = couponMapper.useCoupon(couponId);
-        if (updated == 0) {
-            log.error("쿠폰 사용 처리 실패: couponId={}", couponId);
-            throw new BusinessException(ErrorCode.COUPON_FAILED_USED);
-        }
-
-        log.info("쿠폰 사용 처리 완료: couponId={}", couponId);
-    }
+    
+    // CouponEventListener에서 쿠폰 사용처리함
+//    /**
+//     * 쿠폰 사용 처리
+//     * - PaymentService에서 결제 승인 성공 시 호출
+//     * - is_used = 'Y', used_at = 현재 시간
+//     *
+//     * @param couponId 쿠폰 ID
+//     * @author danjae
+//     */
+//    @Override
+//    @Transactional
+//    public void applyCouponUsage(Long couponId) {
+//        log.info("쿠폰 사용 처리 시작: couponId={}", couponId);
+//
+//        int updated = couponMapper.useCoupon(couponId);
+//        if (updated == 0) {
+//            log.error("쿠폰 사용 처리 실패: couponId={}", couponId);
+//            throw new BusinessException(ErrorCode.COUPON_FAILED_USED);
+//        }
+//
+//        log.info("쿠폰 사용 처리 완료: couponId={}", couponId);
+//    }
 
     /**
      * 쿠폰 복구 처리
