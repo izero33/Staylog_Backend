@@ -12,6 +12,7 @@ import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDate;
@@ -65,12 +66,12 @@ public class CouponEventListener {
 
 
     /**
-     * 결제완료 이벤트리스너 메서드(쿠폰 사용 처리)
-     *
-     * @param event 결제 이벤트 객체
+     * 결제완료 이벤트리스너 메서드
+     * @apiNote 결제 트랜잭션에 포함시키기 위해 BEFORE_COMMIT를 사용해서 결제와 쿠폰 사용의 원자성 보장
      * @author 이준혁
+     * @param event 결제 이벤트 객체
      */
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     private void handlePaymentConfirmEvent(PaymentConfirmEvent event) {
 
         long couponId = event.getCouponId();
