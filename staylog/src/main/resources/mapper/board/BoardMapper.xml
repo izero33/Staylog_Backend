@@ -113,7 +113,10 @@
             b.region_code AS regionCode,
             b.board_type AS boardType,
             b.accommodation_id AS accommodationId,
+            a.name AS accommodationName,
             b.booking_id AS bookingId,
+            TO_CHAR(r.check_in, 'YYYY-MM-DD') AS checkIn,
+            TO_CHAR(r.check_out, 'YYYY-MM-DD') AS checkOut,
             b.user_id AS userId,
             u.name AS userName,
             u.nickname AS userNickName,
@@ -128,6 +131,10 @@
         FROM board b
         JOIN users u
             ON b.user_id = u.user_id
+        LEFT JOIN accommodation a
+            ON b.accommodation_id = a.accommodation_id
+        JOIN reservation r
+            ON b.booking_id = r.booking_id
         WHERE b.board_id = #{boardId}
     </select>
 
@@ -234,7 +241,9 @@
     <!-- 게시글 PK로 숙소명 조회 (알림에서 사용) -->
     <select id="getAccommodationNameByBoardId" parameterType="long" resultType="String">
         SELECT a.name
-        FROM accommodation a JOIN board b ON a.accommodation_id = b.accommodation_id
+        FROM accommodation a
+        JOIN board b
+            ON a.accommodation_id = b.accommodation_id
         WHERE b.board_id = #{boardId}
     </select>
 
