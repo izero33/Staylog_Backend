@@ -1,5 +1,6 @@
 package com.staylog.staylog.global.annotation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.staylog.staylog.global.exception.BusinessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,7 +28,8 @@ import java.sql.SQLException;
                 BusinessException.class,
                 DataIntegrityViolationException.class,
                 NullPointerException.class,
-                IllegalArgumentException.class
+                IllegalArgumentException.class,
+                JsonProcessingException.class
         },
         maxAttempts = 3, // 최대 재시도 횟수
         backoff = @Backoff(delay = 1000, multiplier = 2) // 1, 2 ,4초 간격으로 재시도

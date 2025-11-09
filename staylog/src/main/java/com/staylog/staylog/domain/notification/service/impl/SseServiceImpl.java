@@ -1,15 +1,14 @@
 package com.staylog.staylog.domain.notification.service.impl;
 
-import com.staylog.staylog.domain.notification.dto.response.NotificationResponse;
 import com.staylog.staylog.domain.notification.service.SseService;
-import com.staylog.staylog.global.common.code.ErrorCode;
-import com.staylog.staylog.global.exception.BusinessException;
-import com.staylog.staylog.global.security.jwt.JwtTokenProvider;
-import com.staylog.staylog.global.security.jwt.JwtTokenValidator;
+import com.staylog.staylog.global.annotation.CommonRetryable;
+import com.staylog.staylog.global.event.NotificationCreatedAllEvent;
+import com.staylog.staylog.global.event.NotificationCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -61,15 +60,17 @@ public class SseServiceImpl implements SseService {
 
     /**
      * 특정 유저에게 알림 푸시 메서드
+     * 알림 저장 이벤트를 받아 실행된다.
      * @author 이준혁
      * @apiNote NotificationServiceImpl에서 호출하여 사용한다.
      * IOException은 해당 메서드에서 처리
-     * @param userId 알림을 받을 유저의 PK
-     * @param notificationResponse 프론트에서 즉시 사용할 수 있는 형태의 JSON 객체
+     * @param event -> userId, notificationResponse
      */
-    @Override
-    public void sendNotification(Long userId, NotificationResponse notificationResponse) {
-        
+    @TransactionalEventListener
+    @CommonRetryable // 실패시 재시도
+    public void sendNotification(NotificationCreatedEvent event) {
+        long userId = event.getUserId();
+
         // Map에서 해당 유저의 emitter를 꺼내기
         SseEmitter emitter = emitters.get(userId);
 
@@ -77,7 +78,7 @@ public class SseServiceImpl implements SseService {
             try { // new-notification 이벤트로 JSON으로 변환된 알림 전송
                 emitter.send(SseEmitter.event()
                         .name("new-notification")
-                        .data(notificationResponse));
+                        .data(event.getNotificationResponse()));
             } catch (IOException e) {
                 // 클라이언트 연결이 끊겼을 경우 제거
                 emitters.remove(userId);
@@ -92,16 +93,18 @@ public class SseServiceImpl implements SseService {
 
     /**
      * 현재 접속된 전체 사용자에게 알림을 보내는 메서드
+     * 알림 일괄 저장 이벤트를 받아 실행된다.
      * @author 이준혁
-     * @param notificationResponse 알림 데이터
+     * @param event -> notificationResponse 알림 데이터
      */
-    @Override
-    public void broadcast(NotificationResponse notificationResponse) {
+    @TransactionalEventListener
+    @CommonRetryable // 실패시 재시도
+    public void broadcast(NotificationCreatedAllEvent event) {
         emitters.forEach((userId, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
                         .name("new-notification")
-                        .data(notificationResponse));
+                        .data(event.getNotificationResponse()));
             } catch (IOException e) {
                 emitters.remove(userId);
                 log.warn("Broadcast 중 유효하지 않은 Emitter 발견 - userId={}", userId);

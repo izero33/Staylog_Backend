@@ -10,9 +10,12 @@ import com.staylog.staylog.domain.notification.mapper.NotificationMapper;
 import com.staylog.staylog.domain.notification.service.NotificationService;
 import com.staylog.staylog.domain.notification.service.SseService;
 import com.staylog.staylog.global.common.code.ErrorCode;
+import com.staylog.staylog.global.event.NotificationCreatedAllEvent;
+import com.staylog.staylog.global.event.NotificationCreatedEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final ObjectMapper objectMapper;
     private final SseService sseService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     /**
@@ -47,21 +51,26 @@ public class NotificationServiceImpl implements NotificationService {
 
         // DB 저장
         int success = notificationMapper.notiSave(notificationRequest);
-        if (success == 1) {
-            // 클라이언트에게 SSE로 푸시하기위한 객체 구성
-            NotificationResponse notificationResponse = NotificationResponse.builder()
-                    .notiId(notificationRequest.getNotiId()) // selectKey로 채워진 알림 PK
-                    .targetId(notificationRequest.getTargetId()) // 페이지 이동을 위한 PK
-                    .details(detailsResponse)
-                    .isRead("N")
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            // SSE Push 메서드 호출
-            sseService.sendNotification(notificationRequest.getUserId(), notificationResponse);
+        if (success == 0) {
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
-    }
 
+        // 클라이언트에게 SSE로 푸시하기위한 객체 구성
+        NotificationResponse notificationResponse = NotificationResponse.builder()
+                .notiId(notificationRequest.getNotiId()) // selectKey로 채워진 알림 PK
+                .targetId(notificationRequest.getTargetId()) // 페이지 이동을 위한 PK
+                .details(detailsResponse)
+                .isRead("N")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+
+        // =========== 알림 저장 이벤트 발행(SSE 푸시) ==============
+        NotificationCreatedEvent event = new NotificationCreatedEvent(notificationRequest.getUserId(), notificationResponse);
+        eventPublisher.publishEvent(event);
+        // ======================================================
+
+    }
 
 
     /**
@@ -76,12 +85,16 @@ public class NotificationServiceImpl implements NotificationService {
      * @author 이준혁
      */
     @Override
+    @Transactional
     public void saveAllNotification(NotificationRequest notificationRequest, DetailsResponse detailsResponse) {
 
-        // DB 저장
-        int success = notificationMapper.notiSaveBroadcast(notificationRequest);
+        try {
+            // DB 저장
+            notificationMapper.notiSaveBroadcast(notificationRequest);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
 
-        if (success > 0) {
             // 클라이언트에게 SSE로 푸시하기위한 객체 구성
             NotificationResponse notificationResponse = NotificationResponse.builder()
                     .notiId(null) // selectKey로 채워진 알림 PK
@@ -91,9 +104,11 @@ public class NotificationServiceImpl implements NotificationService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
-            // SSE Push 메서드 호출
-            sseService.broadcast(notificationResponse);
-        }
+            // =========== 단체 알림 저장 이벤트 발행(SSE 푸시) ==============
+            NotificationCreatedAllEvent event = new NotificationCreatedAllEvent(notificationResponse);
+            eventPublisher.publishEvent(event);
+            // ======================================================
+
     }
 
 
@@ -162,8 +177,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     /**
      * 해당 유저의 알림 전체 삭제
-     * @author 이준혁
+     *
      * @param userId 유저 PK
+     * @author 이준혁
      */
     public void deleteNotificationAll(long userId) {
         try {
