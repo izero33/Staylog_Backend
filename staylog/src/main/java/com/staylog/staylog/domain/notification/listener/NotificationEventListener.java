@@ -17,6 +17,7 @@ import com.staylog.staylog.global.annotation.CommonRetryable;
 import com.staylog.staylog.global.event.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -49,7 +50,7 @@ public class NotificationEventListener {
      * @author 이준혁
      */
     @Async
-    @TransactionalEventListener // (phase = TransactionPhase.BEFORE_COMMIT) // 트랜잭션 큐의 누락 방지를 위해 BEFORE_COMMIT 사용
+    @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleCouponIssuanceNotification(CouponCreatedEvent event) {
         long recipientId = event.getUserId(); // 수신자 PK
@@ -80,13 +81,12 @@ public class NotificationEventListener {
 
         } catch (JsonProcessingException e) {
             log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
-            // BEFORE_COMMIT으로 처리할 경우 예외 발생 시 롤백되지만 throw없이 log만 남겨서 롤백 방지
-            // throw new RuntimeException(e); -> 사용 X
+             throw new RuntimeException(e);
         }
     }
 
     /**
-     * 전체 쿠폰 발급(전체 사용자 일괄 쿠폰 발급 이벤트리스너)
+     * 전체 쿠폰 발급 알림(전체 사용자 일괄 쿠폰 발급 이벤트리스너)
      *
      * @param event 쿠폰 발급 이벤트 객체
      * @author 이준혁
@@ -226,7 +226,7 @@ public class NotificationEventListener {
 
         } catch (JsonProcessingException e) {
             log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
-//            throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -320,6 +320,48 @@ public class NotificationEventListener {
             throw new RuntimeException(e);
         }
 
+    }
+
+    /**
+     * Retryable 재시도 최종 실패 시 실행될 Recover 로직
+     * @author 이준혁
+     * @param t 예외 객체
+     * @param event 실패한 이벤트 객체
+     */
+    @Recover
+    public void recoverNotifications(Throwable t, Object event) {
+        log.error("[Recover] 알림 발송 재시도 최종 실패. 원인: {}", t.getMessage(), t);
+
+        if (event instanceof CouponCreatedEvent cce) {
+            log.error(" -> 실패 이벤트 상세: CouponCreatedEvent (UserID: {})", cce.getUserId());
+
+        } else if (event instanceof CouponCreatedAllEvent) {
+            log.error(" -> 실패 이벤트 상세: CouponCreatedAllEvent (전체 발송)");
+
+        } else if (event instanceof PaymentConfirmEvent pce) {
+            log.error(" -> 실패 이벤트 상세: PaymentConfirmEvent (PaymentID: {}, BookingID: {}, CouponID: {})",
+                    pce.getPaymentId(), pce.getBookingId(), pce.getCouponId());
+
+            // TODO: handlePaymentCancelNotification 구현 시 추가 필요
+
+        } else if (event instanceof ReviewCreatedEvent rce) {
+            log.error(" -> 실패 이벤트 상세: ReviewCreatedEvent (UserID: {}, BoardID: {})",
+                    rce.getUserId(), rce.getBoardId());
+
+        } else if (event instanceof CommentCreatedEvent cce) {
+            log.error(" -> 실패 이벤트 상세: CommentCreatedEvent (UserID: {}, BoardID: {}, CommentID: {})",
+                    cce.getUserId(), cce.getBoardId(), cce.getCommentId());
+
+        } else if (event instanceof SignupEvent se) {
+            log.error(" -> 실패 이벤트 상세: SignupEvent (UserID: {})", se.getUserId());
+
+        } else {
+            // 향후 추가될 알림 관련 리스너를 위한 폴백
+            log.error(" -> 실패 이벤트 상세: 알 수 없는 Event Type={}, Data={}",
+                    event.getClass().getSimpleName(), event);
+        }
+
+        // TODO: 공통 복구 로직 (예: 실패한 알림 정보를 별도 DB 테이블에 저장)
     }
 
 }

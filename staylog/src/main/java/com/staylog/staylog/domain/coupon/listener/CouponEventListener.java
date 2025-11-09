@@ -12,6 +12,7 @@ import com.staylog.staylog.global.event.SignupEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -110,4 +111,35 @@ public class CouponEventListener {
 
 
     // TODO: 결제 취소 시 쿠폰 미사용 처리 리스너 구현 필요
+
+
+
+    /**
+     * Retryable 재시도 최종 실패 시 실행될 Recover 로직
+     * @author 이준혁
+     * @param t 예외 객체
+     * @param event 실패한 이벤트 객체
+     */
+    @Recover
+    public void recoverCouponOperations(Throwable t, Object event) {
+        log.error("[Recover] 쿠폰 관련 작업 재시도 최종 실패. 원인: {}", t.getMessage(), t);
+
+        if (event instanceof ReviewCreatedEvent rce) {
+            log.error(" -> 실패 작업 상세: 리뷰 쿠폰 발급 (UserID: {}, BoardID: {})", rce.getUserId(), rce.getBoardId());
+
+        } else if (event instanceof SignupEvent se) {
+            log.error(" -> 실패 작업 상세: 회원가입 쿠폰 발급 (UserID: {})", se.getUserId());
+
+        } else if (event instanceof PaymentConfirmEvent pce) {
+            log.error(" -> 실패 작업 상세: 쿠폰 사용 처리 (PaymentID: {}, CouponID: {})", pce.getPaymentId(), pce.getCouponId());
+
+            // TODO: 쿠폰 미사용 처리 리스너 구현 시 추가 필요
+
+        } else {
+            // 향후 추가될 쿠폰 관련 리스너를 위한 폴백
+            log.error(" -> 실패 작업 상세: 알 수 없는 Event Type={}, Data={}", event.getClass().getSimpleName(), event);
+        }
+    }
+
+
 }
