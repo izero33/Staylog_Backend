@@ -9,7 +9,6 @@ import com.staylog.staylog.domain.booking.mapper.BookingMapper;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
 import com.staylog.staylog.domain.notification.dto.response.DetailsResponse;
 import com.staylog.staylog.domain.notification.service.NotificationService;
-import com.staylog.staylog.domain.payment.dto.response.PreparePaymentResponse;
 import com.staylog.staylog.domain.payment.entity.Payment;
 import com.staylog.staylog.domain.payment.mapper.PaymentMapper;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
@@ -20,14 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import com.staylog.staylog.global.event.CouponCreatedEvent;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor

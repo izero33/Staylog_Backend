@@ -116,8 +116,9 @@ public enum ErrorCode {
     // ==================== 쿠폰 관련 에러 (13xxx) ====================
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "E13001", "error.coupon.not.found"),
     COUPON_FAILED_USED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.used"),
-    COUPON_FAILED_CREATED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.created"),
-    COUPON_FAILED_DELETED(HttpStatus.BAD_REQUEST, "E13002", "error.coupon.failed.deleted");
+    COUPON_FAILED_UNUSED(HttpStatus.BAD_REQUEST, "E13003", "error.coupon.failed.unused"),
+    COUPON_FAILED_CREATED(HttpStatus.BAD_REQUEST, "E13004", "error.coupon.failed.created"),
+    COUPON_FAILED_DELETED(HttpStatus.BAD_REQUEST, "E13005", "error.coupon.failed.deleted");
 
     private final HttpStatus status;
     private final String code;
