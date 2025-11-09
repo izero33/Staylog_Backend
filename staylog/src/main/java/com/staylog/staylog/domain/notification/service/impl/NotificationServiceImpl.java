@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -64,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     /**
-     * 전체 사용자 일괄 알림 데이터 저장 및 푸시
+     * 전체 사용자 일괄 알림 데이터 저장
      *
      * @param notificationRequest 알림 데이터 + JSON 형태의 String Type 데이터
      * @param detailsResponse     반복적인 직렬화, 역직렬화를 막기 위한 온전한 Details 객체(프론트에 그대로 출력 가능)
@@ -110,8 +111,9 @@ public class NotificationServiceImpl implements NotificationService {
         List<NotificationSelectRequest> notiListFromDb = notificationMapper.findNotificationsByUserId(userId);
 
         if (notiListFromDb == null || notiListFromDb.isEmpty()) {
-            log.warn("알림 데이터 조회 실패: 알림 정보를 찾을 수 없습니다. - userId={}", userId);
-            throw new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND);
+            log.warn("알림 데이터 조회 실패: 알림이 없거나, 알림 정보를 찾을 수 없습니다. - userId={}", userId);
+//            throw new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND);
+            return Collections.emptyList();
         }
 
         // map으로 순환하며 프론트에서 바로 사용할 수 있는 JSON으로 가공
@@ -156,6 +158,21 @@ public class NotificationServiceImpl implements NotificationService {
             throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
         }
     }
+
+
+    /**
+     * 해당 유저의 알림 전체 삭제
+     * @author 이준혁
+     * @param userId 유저 PK
+     */
+    public void deleteNotificationAll(long userId) {
+        try {
+            notificationMapper.deleteAllByUserId(userId);
+        } catch (BusinessException e) {
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
+    }
+
 
     /**
      * 단일 알림 읽음 처리

@@ -35,6 +35,12 @@
         WHERE noti_id = #{notiId}
     </delete>
 
+    <!-- 알림 데이터 전체 삭제 -->
+    <delete id="deleteAllByUserId" parameterType="long">
+        DELETE FROM notification
+        WHERE user_id = #{userId}
+    </delete>
+
     <!-- 단일 알림 읽음 처리 -->
     <update id="readOne" parameterType="readRequest">
         UPDATE notification
