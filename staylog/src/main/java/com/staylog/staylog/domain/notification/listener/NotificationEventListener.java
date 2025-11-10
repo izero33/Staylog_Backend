@@ -7,7 +7,9 @@ import com.staylog.staylog.domain.board.mapper.BoardMapper;
 import com.staylog.staylog.domain.board.mapper.CommentsMapper;
 import com.staylog.staylog.domain.booking.entity.AccommodationIdAndName;
 import com.staylog.staylog.domain.booking.mapper.BookingMapper;
+import com.staylog.staylog.domain.image.dto.ImageDto;
 import com.staylog.staylog.domain.image.dto.ImageResponse;
+import com.staylog.staylog.domain.image.mapper.ImageMapper;
 import com.staylog.staylog.domain.image.service.ImageService;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
 import com.staylog.staylog.domain.notification.dto.response.DetailsResponse;
@@ -45,7 +47,9 @@ public class NotificationEventListener {
     private final BookingMapper bookingMapper;
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
-    private final ImageService imageService;
+    //    private final ImageService imageService;
+    private final ImageMapper imageMapper;
+
 
 
     /**
@@ -60,9 +64,16 @@ public class NotificationEventListener {
     public void handleCouponIssuanceNotification(CouponCreatedEvent event) {
         long recipientId = event.getUserId(); // 수신자 PK
 
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ICON")
+                .targetId(2)
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
+
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title("쿠폰이 발급되었습니다!")
                 .message("쿠폰함을 확인해주세요")
@@ -95,9 +106,16 @@ public class NotificationEventListener {
     @CommonRetryable // 실패시 재시도
     public void handleCouponAllIssuanceNotification(CouponCreatedAllEvent event) {
 
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ICON")
+                .targetId(2)
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
+
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title("쿠폰이 발급되었습니다!")
                 .message("쿠폰함을 확인해주세요")
@@ -302,12 +320,19 @@ public class NotificationEventListener {
     @CommonRetryable // 실패시 재시도
     public void handleSignupNotification(SignupEvent event) {
 
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ICON")
+                .targetId(1)
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
+
         long recipientId = event.getUserId();
         String nickname = userMapper.findNicknameByUserId(recipientId);
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl) // TODO: 이미지 삽입 필요
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(nickname + "님!")
                 .message("회원가입을 축하합니다!")
