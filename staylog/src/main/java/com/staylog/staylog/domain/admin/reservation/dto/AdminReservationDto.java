@@ -35,6 +35,5 @@ public class AdminReservationDto {
     private LocalDateTime updatedAt;
     private String paymentMethod;
     private LocalDateTime paidAt;
-    private String paymentStatus;
 }
 
