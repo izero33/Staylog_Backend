@@ -41,4 +41,12 @@ public interface ImageMapper {
      */
     List<ImageDto> selectImagesByTargetIds(@Param("targetType") String targetType,
     									@Param("targetIds") List<Long> targetIds);
+    
+    /**
+     * 여러 targetId에 대한 대표이미지 조회 (displayOrder기준)
+     * @param targetType 이미지 타입
+     * @param targetIds 조회할 target ID 목록
+     * @return 대표 이미지 DTO 목록
+     */
+    List<ImageDto> selectFirstImageByTargetIds(String targetType, List<Long> targetIds);
 }
