@@ -163,7 +163,7 @@
             </foreach>
           GROUP BY
             target_id
-        ) AS min_orders
+        ) min_orders
         ON
           t.target_id = min_orders.target_id
           AND t.display_order = min_orders.min_display_order
@@ -171,7 +171,7 @@
           t.target_type = #{targetType}
         GROUP BY
         	t.target_id
-	    ) AS representative_images
+	    ) representative_images
 	    ON
         i.image_id = representative_images.representative_image_id
 	    WHERE

@@ -1,7 +1,6 @@
 package com.staylog.staylog.domain.accommodation.dto.response;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.apache.ibatis.type.Alias;
 
@@ -25,6 +24,6 @@ public class ReviewResponse {
 	private int reviewCount;
 	private String title;
 	private String content;
+	private ImageData images;
 	private Timestamp createdAt;
-	private List<ImageData> images;
 }

@@ -12,6 +12,8 @@ import com.staylog.staylog.domain.accommodation.dto.response.RoomListResponse;
 import com.staylog.staylog.domain.accommodation.mapper.AccommodationMapper;
 import com.staylog.staylog.domain.accommodation.mapper.RoomMapper;
 import com.staylog.staylog.domain.accommodation.service.AccommodationService;
+import com.staylog.staylog.domain.image.assembler.ImageAssembler;
+import com.staylog.staylog.domain.image.dto.ImageData;
 import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.exception.BusinessException;
 
@@ -26,6 +28,7 @@ public class AccommodationServiceImpl implements AccommodationService {
 	// 의존 주입
     private final AccommodationMapper acMapper;
     private final RoomMapper rmMapper;
+    private final ImageAssembler imageAssembler;
 	
     @Override
 	public AccommodationDetailResponse getAcDetail(Long accommodationId) {
@@ -69,9 +72,18 @@ public class AccommodationServiceImpl implements AccommodationService {
 	@Override
 	public List<ReviewResponse> getAcRvList(Long accommodationId) {
 		List<ReviewResponse> reviewList = acMapper.selectReviewList(accommodationId);
+		
 		if(reviewList == null) {
 			throw new BusinessException(ErrorCode.ACCOMMODATION_REVIEW_LIST_NOT_FOUND);
 	    }
+		
+		imageAssembler.assembleFirstImage(
+			reviewList,
+			ReviewResponse::getBoardId,
+			ReviewResponse::setImages,
+			"BOARD_REVIEW_CONTENT"
+		);
+	    
 	    return reviewList;
 	}
 }
