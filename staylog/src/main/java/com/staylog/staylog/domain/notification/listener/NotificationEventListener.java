@@ -158,13 +158,19 @@ public class NotificationEventListener {
 //                "IMG_FROM_ACCOMMODATION", (long) accommodationInfo.get("accommodationId")
 //        );
 //        String imageUrl = imageResponse.getImages().get(0).getImageUrl(); // 숙소 메인이미지
-        // TODO: 숙소의 대표 이미지만 가져오는 메서드를 정의해서 사용하는 구조로 성능 개선 필요
+
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ACCOMMODATION")
+                .targetId(accommodationInfo.getAccommodationId())
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
 
         OffsetDateTime approvedAt = payment.getApprovedAt(); // 결제 승인 시간
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(approvedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(accommodationInfo.getAccommodationName())
                 .message("예약이 확정되었습니다.")
@@ -202,9 +208,16 @@ public class NotificationEventListener {
         long recipientId = bookingMapper.findUserIdByBookingId(event.getBookingId()); // 수신자(예약자) PK
         AccommodationIdAndName accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
 
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ACCOMMODATION")
+                .targetId(accommodationInfo.getAccommodationId())
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
+
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(accommodationInfo.getAccommodationName())
                 .message("예약이 취소되었습니다.")
@@ -240,14 +253,21 @@ public class NotificationEventListener {
     public void handleReviewCreationNotification(ReviewCreatedEvent event) {
         long recipientId = (long) 7;  // TODO: 원래 Admin에게 보내야하지만 개발 환경이라 infreeJ 아이디로 수취
         String nickname = userMapper.findNicknameByUserId(event.getUserId());
-        String accommodationName = boardMapper.getAccommodationNameByBoardId(event.getBoardId());
+        AccommodationIdAndName accommodationInfo = boardMapper.getAccommodationNameAndIdByBoardId(event.getBoardId());
+
+        // 이미지 가져오기
+        ImageDto imageDto = ImageDto.builder()
+                .targetType("IMG_FROM_ACCOMMODATION")
+                .targetId(accommodationInfo.getAccommodationId())
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(nickname) // 리뷰 작성자 닉네임
-                .message("[" + accommodationName + "]" + " 신규 리뷰")
+                .message("[" + accommodationInfo.getAccommodationName() + "]" + " 신규 리뷰")
                 .typeName("Review")
                 .build();
 
@@ -332,7 +352,7 @@ public class NotificationEventListener {
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("/images/" + imageUrl) // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(nickname + "님!")
                 .message("회원가입을 축하합니다!")
