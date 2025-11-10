@@ -15,7 +15,9 @@ import com.staylog.staylog.domain.payment.entity.Payment;
 import com.staylog.staylog.domain.payment.mapper.PaymentMapper;
 import com.staylog.staylog.domain.user.mapper.UserMapper;
 import com.staylog.staylog.global.annotation.CommonRetryable;
+import com.staylog.staylog.global.common.code.ErrorCode;
 import com.staylog.staylog.global.event.*;
+import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Recover;
@@ -65,25 +67,19 @@ public class NotificationEventListener {
                 .typeName("Coupon")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_COUPON_CREATE")
-                    .targetId(recipientId) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_COUPON_CREATE")
+                .targetId(recipientId) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
-
-        } catch (JsonProcessingException e) {
-            log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
-             throw new RuntimeException(e);
-        }
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
     }
 
     /**
@@ -106,24 +102,20 @@ public class NotificationEventListener {
                 .typeName("Coupon")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(null)
-                    .notiType("NOTI_COUPON_CREATE")
-                    .targetId(null) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(null)
+                .notiType("NOTI_COUPON_CREATE")
+                .targetId(null) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveAllNotification(notificationRequest, detailsResponse);
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveAllNotification(notificationRequest, detailsResponse);
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -137,46 +129,42 @@ public class NotificationEventListener {
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handlePaymentConfirmNotification(PaymentConfirmEvent event) {
-    	Payment payment = paymentMapper.findPaymentById(event.getPaymentId());
+        Payment payment = paymentMapper.findPaymentById(event.getPaymentId());
 
         long recipientId = bookingMapper.findUserIdByBookingId(event.getBookingId()); // 수신자(예약자) PK
         Map<String, Object> accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
 
         ImageResponse imageResponse = imageService.getImagesByTarget(
-                "IMG_FROM_ACCOMMODATION", (long)accommodationInfo.get("accommodationId")
+                "IMG_FROM_ACCOMMODATION", (long) accommodationInfo.get("accommodationId")
         );
         String imageUrl = imageResponse.getImages().get(0).getImageUrl(); // 숙소 메인이미지
         // TODO: 숙소의 대표 이미지만 가져오는 메서드를 정의해서 사용하는 구조로 성능 개선 필요
 
-        OffsetDateTime approvedAt = payment.getApprovedAt() ; // 결제 승인 시간
+        OffsetDateTime approvedAt = payment.getApprovedAt(); // 결제 승인 시간
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
                 .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
                 .date(approvedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .title((String)accommodationInfo.get("accommodationName"))
+                .title((String) accommodationInfo.get("accommodationName"))
                 .message("예약이 확정되었습니다.")
                 .typeName("Reservation")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_RES_CONFIRM")
-                    .targetId(event.getPaymentId()) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_RES_CONFIRM")
+                .targetId(event.getPaymentId()) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -190,7 +178,7 @@ public class NotificationEventListener {
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleRefundConfirmNotification(RefundConfirmEvent event) {
-        
+
         long recipientId = bookingMapper.findUserIdByBookingId(event.getBookingId()); // 수신자(예약자) PK
         Map<String, Object> accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
 
@@ -198,29 +186,25 @@ public class NotificationEventListener {
         DetailsResponse detailsResponse = DetailsResponse.builder()
                 .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
                 .date(OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .title((String)accommodationInfo.get("accommodationName"))
+                .title((String) accommodationInfo.get("accommodationName"))
                 .message("예약이 취소되었습니다.")
                 .typeName("Reservation")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_RES_CANCEL")
-                    .targetId(event.getRefundId()) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_RES_CANCEL")
+                .targetId(event.getRefundId()) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -247,25 +231,20 @@ public class NotificationEventListener {
                 .typeName("Review")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_REVIEW_CREATE")
-                    .targetId(event.getBoardId()) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_REVIEW_CREATE")
+                .targetId(event.getBoardId()) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
+        // DB 저장 후 SSE 요청 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
 
-        } catch (JsonProcessingException e) {
-            log.error("handleCouponCreatedEvent 처리 중 오류 발생. event: {}", event, e);
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -293,24 +272,19 @@ public class NotificationEventListener {
                 .typeName("Comment")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_COMMENT_CREATE")
-                    .targetId(commentsDto.getBoardId()) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_COMMENT_CREATE")
+                .targetId(commentsDto.getBoardId()) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
 
     }
 
@@ -338,33 +312,46 @@ public class NotificationEventListener {
                 .typeName("Signup")
                 .build();
 
-        try {
-            // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
-            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+        // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성 메서드
+        String detailsObject = detailsToJsonString(detailsResponse);
 
-            // INSERT의 parameterType 객체 구성
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .userId(recipientId)
-                    .notiType("NOTI_SIGNUP")
-                    .targetId(recipientId) // 이동할 페이지 PK
-                    .details(detailsObject)
-                    .build();
+        // INSERT의 parameterType 객체 구성
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .userId(recipientId)
+                .notiType("NOTI_SIGNUP")
+                .targetId(recipientId) // 이동할 페이지 PK
+                .details(detailsObject)
+                .build();
 
-            // DB 저장 후 SSE 요청하는 메서드 호출
-            notificationService.saveNotification(notificationRequest, detailsResponse);
-
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+        // DB 저장 후 SSE 요청하는 메서드 호출
+        notificationService.saveNotification(notificationRequest, detailsResponse);
     }
+
+
+    /**
+     * 알림 데이터를 DB에 저장하기 위한 JSON 직렬화
+     * @author 이준혁
+     * @param detailsResponse 알림 데이터
+     * @return detailsObject 직렬화된 문자열
+     */
+    private String detailsToJsonString(DetailsResponse detailsResponse) {
+        try { // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
+            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+            log.info("알림 데이터 직렬화 완료");
+            return detailsObject;
+        } catch (JsonProcessingException e) {
+            log.error("알림 데이터 직렬화 중 오류 발생");
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
+    }
+
 
     /**
      * Retryable 재시도 최종 실패 시 실행될 Recover 로직
-     * @author 이준혁
-     * @param t 예외 객체
+     *
+     * @param t     예외 객체
      * @param event 실패한 이벤트 객체
+     * @author 이준혁
      */
     @Recover
     public void recoverNotifications(Throwable t, Object event) {
@@ -400,7 +387,7 @@ public class NotificationEventListener {
             log.error(" -> 실패 이벤트 상세: 알 수 없는 Event Type={}, Data={}",
                     event.getClass().getSimpleName(), event);
         }
-        
+
         // 에러 테이블 추가 시 DB 저장 필요
     }
 

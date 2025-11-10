@@ -2,6 +2,7 @@ package com.staylog.staylog.global.annotation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.staylog.staylog.global.exception.BusinessException;
+import com.staylog.staylog.global.exception.custom.InfrastructureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
@@ -15,17 +16,17 @@ import java.sql.SQLException;
 
 
 /**
- *
+ * 예외 발생 시 재시도 어노테이션
+ * @author 이준혁
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Retryable(
         retryFor = { // 재시도 대상 예외
-                DataAccessException.class, // 일시적 DB 예외
-                SQLException.class, // 스프링이 변환하지 못한 DB 에러
+                InfrastructureException.class // 재시도 가능한 커스텀 예외 클래스
         },
         noRetryFor = { // 재시도 제외 예외
-                BusinessException.class,
+                BusinessException.class, // 재시도 불가능한 커스텀 예외 클래스
                 DataIntegrityViolationException.class,
                 NullPointerException.class,
                 IllegalArgumentException.class,

@@ -18,6 +18,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0001", "error.internal"),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "E0002", "error.invalid.input"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "E0003", "error.method.not.allowed"),
+    TEMPORARY_SERVER_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "E0004", "error.temporary.server"), // 503 (재시도 O)
 
     // ==================== 인증/인가 에러 (1xxx) ====================
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "E1001", "error.unauthorized"),
@@ -92,7 +93,7 @@ public enum ErrorCode {
 
     // ==================== 알림 관련 에러 (10xxx) ====================
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E10001", "error.notification.not.found"),
-    NOTIFICATION_FAILED(HttpStatus.BAD_REQUEST, "E10002", "error.notification.failed"),
+    NOTIFICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E10002", "error.notification.failed"),
     NOTIFICATION_SUBSCRIBE_FAILED(HttpStatus.BAD_REQUEST, "E10003", "error.notification.subscribe.failed"),
     NOTIFICATION_EMITTER_NOT_FOUND(HttpStatus.NOT_FOUND, "E10004", "error.notification.emitter.not.found"),
 
