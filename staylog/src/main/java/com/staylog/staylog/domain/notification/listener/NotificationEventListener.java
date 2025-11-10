@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.staylog.staylog.domain.board.dto.CommentsDto;
 import com.staylog.staylog.domain.board.mapper.BoardMapper;
 import com.staylog.staylog.domain.board.mapper.CommentsMapper;
+import com.staylog.staylog.domain.booking.entity.AccommodationIdAndName;
 import com.staylog.staylog.domain.booking.mapper.BookingMapper;
 import com.staylog.staylog.domain.image.dto.ImageResponse;
 import com.staylog.staylog.domain.image.service.ImageService;
@@ -133,12 +134,12 @@ public class NotificationEventListener {
         Payment payment = paymentMapper.findPaymentById(event.getPaymentId());
 
         long recipientId = bookingMapper.findUserIdByBookingId(event.getBookingId()); // 수신자(예약자) PK
-        Map<String, Object> accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
+        AccommodationIdAndName accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
 
-        ImageResponse imageResponse = imageService.getImagesByTarget(
-                "IMG_FROM_ACCOMMODATION", (long) accommodationInfo.get("accommodationId")
-        );
-        String imageUrl = imageResponse.getImages().get(0).getImageUrl(); // 숙소 메인이미지
+//        ImageResponse imageResponse = imageService.getImagesByTarget(
+//                "IMG_FROM_ACCOMMODATION", (long) accommodationInfo.get("accommodationId")
+//        );
+//        String imageUrl = imageResponse.getImages().get(0).getImageUrl(); // 숙소 메인이미지
         // TODO: 숙소의 대표 이미지만 가져오는 메서드를 정의해서 사용하는 구조로 성능 개선 필요
 
         OffsetDateTime approvedAt = payment.getApprovedAt(); // 결제 승인 시간
@@ -147,7 +148,7 @@ public class NotificationEventListener {
         DetailsResponse detailsResponse = DetailsResponse.builder()
                 .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
                 .date(approvedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .title((String) accommodationInfo.get("accommodationName"))
+                .title(accommodationInfo.getAccommodationName())
                 .message("예약이 확정되었습니다.")
                 .typeName("Reservation")
                 .build();
@@ -181,13 +182,13 @@ public class NotificationEventListener {
     public void handleRefundConfirmNotification(RefundConfirmEvent event) {
 
         long recipientId = bookingMapper.findUserIdByBookingId(event.getBookingId()); // 수신자(예약자) PK
-        Map<String, Object> accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
+        AccommodationIdAndName accommodationInfo = bookingMapper.findAccommodationIdAndNameByBookingId(event.getBookingId()); // 숙소명
 
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
                 .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
                 .date(OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .title((String) accommodationInfo.get("accommodationName"))
+                .title(accommodationInfo.getAccommodationName())
                 .message("예약이 취소되었습니다.")
                 .typeName("Reservation")
                 .build();
