@@ -44,23 +44,7 @@ public class AccommodationServiceImpl implements AccommodationService {
         if (roomList == null) {
             log.warn("객실 목록 조회 실패 : 숙소 번호 = {} 의 객실 목록을 찾을 수 없습니다", accommodationId);
             throw new BusinessException(ErrorCode.ROOM_LIST_NOT_FOUND);
-        }
-        
-        for (RoomListResponse room : roomList) {
-        	
-            // 오늘 날짜
-            LocalDate today = LocalDate.now();
-            // 90일 상한 정책 (from ~ to 포함, +89일)
-            LocalDate after3Months = today.plusDays(89);
-            
-            // 예약 불가일 조회
-            List<String> blockedDates = rmMapper.SelectBlockedDates(
-                room.getRoomId(),
-                today,
-                after3Months
-            );
-            room.setDisabledDates(blockedDates);
-        }
+        }        
         
         accommodation.setRooms(roomList);
         
@@ -78,8 +62,6 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
         
         accommodation.setReviews(reviewList);
-        
-        // TODO: 숙소 이미지, 객실 이미지 로직 추가 필요
         
         return accommodation;
 	}

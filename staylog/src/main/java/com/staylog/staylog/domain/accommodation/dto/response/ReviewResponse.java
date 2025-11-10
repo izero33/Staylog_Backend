@@ -1,8 +1,11 @@
 package com.staylog.staylog.domain.accommodation.dto.response;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.apache.ibatis.type.Alias;
+
+import com.staylog.staylog.domain.image.dto.ImageData;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +26,5 @@ public class ReviewResponse {
 	private String title;
 	private String content;
 	private Timestamp createdAt;
+	private List<ImageData> images;
 }
