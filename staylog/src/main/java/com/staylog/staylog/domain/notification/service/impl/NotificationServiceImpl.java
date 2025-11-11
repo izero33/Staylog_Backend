@@ -1,6 +1,9 @@
 package com.staylog.staylog.domain.notification.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.staylog.staylog.domain.image.dto.ImageDto;
+import com.staylog.staylog.domain.image.mapper.ImageMapper;
 import com.staylog.staylog.domain.notification.dto.request.NotificationRequest;
 import com.staylog.staylog.domain.notification.dto.request.NotificationSelectRequest;
 import com.staylog.staylog.domain.notification.dto.request.ReadAllRequest;
@@ -30,6 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final ImageMapper imageMapper;
 
 
     /**
@@ -249,6 +253,59 @@ public class NotificationServiceImpl implements NotificationService {
         }
         log.info("unreadCount 조회 완료. userId={}, unreadCount={}", userId, unreadCount);
         return unreadCount;
+    }
+
+
+
+
+
+    /**
+     * 알림 데이터를 DB에 저장하기 위한 JSON 직렬화
+     * @author 이준혁
+     * @param detailsResponse 알림 데이터
+     * @return detailsObject 직렬화된 문자열
+     */
+    @Override
+    public String detailsToJsonString(DetailsResponse detailsResponse) {
+        try { // 알림 데이터를 DB에 저장하기 위한 JSON 형태의 String 문자열 구성
+            String detailsObject = objectMapper.writeValueAsString(detailsResponse);
+            log.info("알림 데이터 직렬화 완료");
+            return detailsObject;
+        } catch (JsonProcessingException e) {
+            log.error("알림 데이터 직렬화 중 오류 발생");
+            throw new BusinessException(ErrorCode.NOTIFICATION_FAILED);
+        }
+    }
+
+
+    /**
+     * 대표 이미지 1장 가져오는 메서드
+     * @author 이준혁
+     * @param targetType 이미지의 타겟 타입
+     * @param targetId 이미지의 타겟 PK
+     * @return 이미지 URL
+     */
+    @Override
+    public String getImageUrl(String targetType, long targetId) {
+        ImageDto imageDto = ImageDto.builder()
+                .targetType(targetType)
+                .targetId(targetId)
+                .build();
+        String imageUrl = imageMapper.getMainImgByTargetTypeAndId(imageDto);
+
+        if(imageUrl != null) {
+            log.info("이미지 조회 완료. imageUrl: {}", imageUrl);
+            return imageUrl;
+        } else {
+            // 이미지가 없을 경우 기본 이미지로 출력
+            log.info("이미지 조회 실패 / 기본 이미지로 출력. targetType: {}, targetId: {}", targetType, targetId);
+            ImageDto defaultImageDto = ImageDto.builder()
+                    .targetType("IMG_FROM_ICON")
+                    .targetId(3)
+                    .build();
+            return imageMapper.getMainImgByTargetTypeAndId(defaultImageDto);
+        }
+
     }
 
 
