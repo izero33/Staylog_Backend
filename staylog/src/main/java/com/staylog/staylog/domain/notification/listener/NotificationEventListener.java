@@ -45,7 +45,7 @@ public class NotificationEventListener {
      * @param event 쿠폰 발급 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleCouponIssuanceNotification(CouponCreatedEvent event) {
@@ -85,7 +85,7 @@ public class NotificationEventListener {
      * @param event 쿠폰 발급 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleCouponAllIssuanceNotification(CouponCreatedAllEvent event) {
@@ -126,7 +126,7 @@ public class NotificationEventListener {
      * @param event 결제 승인 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handlePaymentConfirmNotification(PaymentConfirmEvent event) {
@@ -178,7 +178,7 @@ public class NotificationEventListener {
      * @param event 결제 취소 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleRefundConfirmNotification(RefundConfirmEvent event) {
@@ -222,7 +222,7 @@ public class NotificationEventListener {
      * @param event 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleReviewCreationNotification(ReviewCreatedEvent event) {
@@ -267,7 +267,7 @@ public class NotificationEventListener {
      * @param event 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleCommentCreationNotification(CommentCreatedEvent event) {
@@ -309,7 +309,7 @@ public class NotificationEventListener {
      * @param event 이벤트 객체
      * @author 이준혁
      */
-    @Async
+    @Async("asyncTaskExecutor")
     @TransactionalEventListener
     @CommonRetryable // 실패시 재시도
     public void handleSignupNotification(SignupEvent event) {

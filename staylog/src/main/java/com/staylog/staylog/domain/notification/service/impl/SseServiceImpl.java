@@ -11,6 +11,7 @@ import com.staylog.staylog.global.event.NotificationCreatedEvent;
 import com.staylog.staylog.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -202,6 +203,7 @@ public class SseServiceImpl implements SseService {
      * @author 이준혁
      * 20초마다 주석(comment)를 전송하여 타임아웃을 방지
      */
+    @Async("asyncTaskExecutor")
     @Scheduled(fixedRate = 20000) // 20초
     public void sendHeartbeat() {
         emitters.forEach((userId, emitter) -> {
