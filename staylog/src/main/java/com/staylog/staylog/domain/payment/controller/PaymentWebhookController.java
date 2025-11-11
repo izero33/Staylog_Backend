@@ -48,7 +48,8 @@ public class PaymentWebhookController {
             // 2. status 확인
             String status = rootNode.path("status").asText();
             log.info("입금 상태: {}", status);
-
+            log.info("tossConfig.getWebhookSecret() : {}", tossConfig.getWebhookSecret());
+            
             if (!"DONE".equalsIgnoreCase(status)) {
                 log.info("처리 불필요한 이벤트: {}", status);
                 return ResponseEntity.ok("OK");
