@@ -22,13 +22,4 @@ public class TossVirtualAccountWebhookRequest {
     private String status;
     private String transactionKey;
 
-    // 컨트롤러 코드 호환용
-    public TossVirtualAccountResponse toResponse() {
-        TossVirtualAccountResponse data = new TossVirtualAccountResponse();
-        data.setOrderId(orderId);
-        data.setStatus(status);
-        data.setSecret(secret);
-        // transactionKey는 필요하면 새 필드로 TossVirtualAccountResponse에 추가 가능
-        return data;
-    }
 }
