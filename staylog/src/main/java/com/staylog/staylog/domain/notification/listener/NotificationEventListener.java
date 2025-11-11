@@ -277,9 +277,12 @@ public class NotificationEventListener {
         String nickname = userMapper.findNicknameByUserId(event.getUserId()); // 댓글 작성자 닉네임
         CommentsDto commentsDto = commentsMapper.getOneByCommentId(event.getCommentId()); // 댓글 데이터
 
+        // 이미지 가져오기
+        String imageUrl = notificationService.getImageUrl("IMG_FROM_PROFILE", event.getUserId());
+
         // 알림 카드에 출력할 데이터 구성
         DetailsResponse detailsResponse = DetailsResponse.builder()
-                .imageUrl("https://picsum.photos/id/10/200/300") // TODO: 이미지 삽입 필요
+                .imageUrl("/images/" + imageUrl)
                 .date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .title(nickname) // 댓글 작성자 닉네임
                 .message(commentsDto.getContent())

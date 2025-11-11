@@ -17,7 +17,7 @@ public class AsyncConfig {
 
     /**
      * SimpleAsyncTaskExecutor를 사용하지 않도록 커스텀 TaskExecutor 정의
-     * 로컬 개발환경에서는 현재 설정이 무리없이 동작하지만 t3.small에서 다시 확인 필요
+     * TODO: 로컬 개발환경에서는 현재 설정이 무리없이 동작하지만 t3.small에서 다시 확인 필요
      * @author 이준혁
      * @return Executor
      */
