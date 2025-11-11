@@ -16,19 +16,10 @@ import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TossVirtualAccountWebhookRequest {
 
-    /**
-     * 이벤트 타입
-     * - VirtualAccount.Deposit: 가상계좌 입금 완료
-     */
-    private String eventType;
+    private String createdAt;
+    private String secret;
+    private String orderId;
+    private String status;
+    private String transactionKey;
 
-    /**
-     * 이벤트 발생 시각
-     */
-    private LocalDateTime createdAt;
-
-    /**
-     * 가상계좌 정보
-     */
-    private TossVirtualAccountResponse data;
 }
