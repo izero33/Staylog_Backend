@@ -48,7 +48,7 @@ flowchart LR
     Service --> Mapper
     Mapper --> DB
     Service --> External
-
+```
 ## 주요 기능
 
 ### 사용자 기능
