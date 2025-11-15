@@ -103,7 +103,6 @@ src/main/resources/
 - Refresh Token 유효기간: 14일
 - Spring Security를 통한 API 접근 제어
 
-## 개발 브랜치
 
 
 
