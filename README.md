@@ -26,29 +26,6 @@ STAYLOG는 사용자에게 편리한 숙박 시설 검색 및 예약 서비스�
 - **Toss Payments**: 결제 시스템
 - **Email**: SMTP (Gmail)
 
-## 🛠 시스템 아키텍처
-
-STAYLOG의 백엔드 구조는 **Spring Boot 기반의 REST API 서버**로 구성되어 있으며,  
-클라이언트(React, JSP 등)와의 통신은 JSON 형태로 이루어집니다.  
-Toss Payments, Kakao API 등 외부 서비스와의 연동을 통해 예약, 결제, 알림 기능을 제공합니다.
-
-```mermaid
-flowchart LR
-    Client[Frontend - Staylog Web/App]
-    subgraph Backend["Staylog Backend (Spring Boot)"]
-        Controller["Controller Layer"]
-        Service["Service Layer"]
-        Mapper["MyBatis Mapper"]
-        DB[(Oracle DB)]
-        External["External APIs (Toss, Kakao, SMTP)"]
-    end
-
-    Client -->|REST API (JSON)| Controller
-    Controller --> Service
-    Service --> Mapper
-    Mapper --> DB
-    Service --> External
-```
 ## 주요 기능
 
 ### 사용자 기능
