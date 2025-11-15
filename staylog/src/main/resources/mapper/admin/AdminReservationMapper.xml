@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staylog.staylog.domain.admin.reservation.mapper.AdminReservationMapper">
+
+    <!-- 공통 WHERE -->
+    <sql id="resWhere">
+        <where>
+            <!-- 상태 -->
+            <if test="status != null and status != ''">
+                AND r.status = #{status}
+            </if>
+
+            <!-- 게스트명 / 유저명 -->
+            <if test="guestName != null and guestName != ''">
+                AND r.guest_name LIKE '%' || #{guestName} || '%'
+            </if>
+            <if test="userName != null and userName != ''">
+                AND u.name LIKE '%' || #{userName} || '%'
+            </if>
+
+            <!-- 선택: 사용자 / 숙소 / 날짜 범위 -->
+            <if test="userId != null">
+                AND r.user_id = #{userId}
+            </if>
+            <if test="stayId != null">
+                AND a.accommodation_id = #{stayId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND r.created_at &gt;= TO_TIMESTAMP(#{startDate}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND r.created_at &lt;  TO_TIMESTAMP(#{endDate}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+
+            <!-- 상태 코드 그룹 (필요 시) -->
+            <if test="statusGroupId != null and statusGroupId != ''">
+                AND c.parent_id = #{statusGroupId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 예약 목록: startRow/endRow 사용 -->
+    <select id="findReservations"
+            parameterType="com.staylog.staylog.domain.admin.reservation.dto.request.AdminReservationListRequest"
+            resultType="com.staylog.staylog.domain.admin.reservation.dto.AdminReservationDto">
+        SELECT *
+        FROM (
+        SELECT inner_t.*, ROWNUM AS rn
+        FROM (
+        SELECT
+        r.booking_id,
+        r.booking_num,
+        r.guest_name,
+        u.name AS user_name,
+        a.name AS accommodation_name,
+        rm.name AS room_name,
+        r.check_in,
+        r.check_out,
+        r.adults,
+        r.children,
+        r.infants,
+        r.total_guest_count,
+        r.amount,
+        r.final_amount,
+        r.status,
+        c.code_name AS status_name,
+        c.attr1     AS status_color,
+        r.created_at,
+        p.method                      AS paymentMethod,
+        p.approved_at                 AS paidAt
+
+        FROM reservation r
+        LEFT JOIN users u         ON u.user_id = r.user_id
+        LEFT JOIN room rm         ON rm.room_id = r.room_id
+        LEFT JOIN accommodation a ON a.accommodation_id = rm.accommodation_id
+        LEFT JOIN common_code c   ON c.code_id = r.status
+        LEFT JOIN (
+        SELECT p1.booking_id,
+        p1.method,
+        p1.approved_at
+        FROM payment p1
+        JOIN (
+        SELECT booking_id, MAX(approved_at) AS approved_at
+        FROM payment
+        WHERE approved_at IS NOT NULL          -- 결제 승인 완료 기준
+        GROUP BY booking_id
+        ) last_paid
+        ON last_paid.booking_id = p1.booking_id
+        AND last_paid.approved_at = p1.approved_at
+        ) p ON p.booking_id = r.booking_id
+        <include refid="resWhere"/>
+        ORDER BY r.created_at DESC
+        ) inner_t
+        WHERE ROWNUM &lt;= #{endRow}          <!-- endRow -->
+        )
+        WHERE rn &gt;= #{startRow}               <!-- startRow -->
+    </select>
+
+    <!-- 예약 상세 조회 (조인키 통일) -->
+    <select id="getReservationDetail"
+            parameterType="long"
+            resultType="com.staylog.staylog.domain.admin.reservation.dto.AdminReservationDto">
+        SELECT
+        r.booking_id,
+        r.booking_num,
+        r.guest_name,
+        u.name  AS user_name,
+        u.email AS user_email,
+        u.phone AS phone,
+        a.name  AS accommodation_name,
+        rm.name AS room_name,
+        r.check_in,
+        r.check_out,
+        r.adults,
+        r.children,
+        r.infants,
+        r.total_guest_count,
+        r.amount,
+        r.final_amount,
+        r.status,
+        c.code_name AS status_name,
+        c.attr1     AS status_color,
+        r.created_at,
+        r.updated_at,
+
+        p.method                       AS paymentMethod,
+        p.approved_at                  AS paidAt
+
+        FROM reservation r
+        LEFT JOIN users u         ON u.user_id = r.user_id
+        LEFT JOIN room rm         ON rm.room_id = r.room_id
+        LEFT JOIN accommodation a ON a.accommodation_id = rm.accommodation_id
+        LEFT JOIN common_code c   ON c.code_id = r.status
+
+        LEFT JOIN (
+        SELECT p1.booking_id,
+        p1.method,
+        p1.approved_at
+        FROM payment p1
+        JOIN (
+        SELECT booking_id, MAX(approved_at) AS approved_at
+        FROM payment
+        WHERE approved_at IS NOT NULL
+        GROUP BY booking_id
+        ) last_paid
+        ON last_paid.booking_id = p1.booking_id
+        AND last_paid.approved_at = p1.approved_at
+        ) p ON p.booking_id = r.booking_id
+
+        WHERE r.booking_id = #{bookingId}
+    </select>
+
+    <!-- 예약 상태 변경 (미 사용) -->
+    <update id="updateReservationStatus" parameterType="map">
+        UPDATE reservation
+        SET status = #{status},
+        updated_at = SYSTIMESTAMP
+        WHERE booking_id = #{bookingId}
+    </update>
+
+    <!-- 전체 건수: 목록과 WHERE/JOINS 완전 동일 -->
+    <select id="countReservations"
+            parameterType="com.staylog.staylog.domain.admin.reservation.dto.request.AdminReservationListRequest"
+            resultType="int">
+        SELECT COUNT(1)
+        FROM reservation r
+        LEFT JOIN users u         ON u.user_id = r.user_id
+        LEFT JOIN room rm         ON rm.room_id = r.room_id
+        LEFT JOIN accommodation a ON a.accommodation_id = rm.accommodation_id
+        LEFT JOIN common_code c   ON c.code_id = r.status
+        <include refid="resWhere"/>
+    </select>
+
+    <!-- 이번 달 예약/매출 요약 -->
+    <select id="getMonthlyStats"
+            resultType="com.staylog.staylog.domain.admin.reservation.dto.AdminMonthlyStatsDto">
+        <![CDATA[
+    SELECT
+        COUNT(1) AS totalCount,
+        SUM(CASE WHEN status IN ('RES_CONFIRM','RES_CONFIRMED') THEN 1 ELSE 0 END) AS confirmedCount,
+        /* 환불 상태 포함 */
+        SUM(CASE WHEN status IN ('RES_CANCEL','RES_CANCELED','RES_CANCELLED','RES_REFUNDED') THEN 1 ELSE 0 END) AS canceledCount,
+        /* 매출은 확정만 합산 */
+        NVL(SUM(CASE WHEN status IN ('RES_CONFIRM','RES_CONFIRMED') THEN NVL(final_amount, 0) ELSE 0 END), 0) AS monthlyRevenue
+    FROM reservation
+    WHERE created_at >= TRUNC(SYSDATE, 'MM')
+        AND created_at <  ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+       ]]>
+    </select>
+
+</mapper>

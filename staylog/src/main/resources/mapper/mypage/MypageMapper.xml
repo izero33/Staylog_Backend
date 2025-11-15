@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staylog.staylog.domain.mypage.mapper.MypageMapper">
+
+    <!-- 1. 회원 정보 조회 -->
+    <select id="selectMemberInfo"
+            parameterType="long"
+            resultType="MemberInfoDto">
+        SELECT
+            user_id, login_id, email, role, name, nickname, phone,
+            gender, birth_date, profile_image, created_at, updated_at
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 2. 회원 정보 수정 -->
+    <update id="updateMemberInfo"
+            parameterType="MemberInfoDto">
+        UPDATE users
+        <set>
+        	<!-- (모두 입력했을 때만 변경) -->
+        	<if test="name != null and name != ''">name = #{name},</if>            
+	        <if test="password != null and password != ''">password = #{password},</if>            
+	        <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>            
+	        <if test="email != null and email != ''">email = #{email},</if>            
+	        <if test="phone != null and phone != ''">phone = #{phone},</if>            
+	        <if test="gender != null and gender != ''">gender = #{gender},</if>
+	        <if test="birthDate != null and birthDate != ''">
+            	birth_date = TO_DATE(REGEXP_SUBSTR(#{birthDate}, '^[0-9]{4}-[0-9]{2}-[0-9]{2}'), 'YYYY-MM-DD'),
+	        </if>
+	        <!-- 프로필 이미지 -->
+			<if test="profileImage != null and profileImage != ''">
+            	profile_image = #{profileImage, jdbcType=VARCHAR},
+       		</if>
+		    updated_at = SYSDATE
+		</set>
+		WHERE user_id = #{userId}
+    </update>
+
+    <!-- 3. 예약 내역 (status = upcoming/completed/canceled) -->
+    <select id="selectBookings"
+            resultType="BookingInfoResponse">
+        SELECT
+            r.booking_id AS bookingId,
+            r.booking_num AS bookingNum,
+            r.pay_id AS payId,
+            r.guest_name AS guestName,
+            r.amount AS amount,
+            r.total_guest_count AS totalGuestCount,
+            a.name AS accommodationName,
+            rm.name AS roomName,
+            rm.room_id AS roomId,
+            r.check_in  AS checkIn,
+            r.check_out AS checkOut,
+            r.status    AS status,
+            r.created_at AS createdAt,
+            r.updated_at AS updatedAt
+        FROM reservation r
+        	JOIN room rm ON r.room_id = rm.room_id
+	        JOIN accommodation a ON rm.accommodation_id = a.accommodation_id
+        WHERE r.user_id = #{userId}
+        <!-- status 필터는 문자열(upcoming/completed/canceled)로 받되 DB값은 CONFIRMED, CANCELED라서 choose 로 매핑 -->
+        <choose>
+        	<!-- 다가올 예약-->
+            <when test="status == 'upcoming'">
+                AND r.status IN('RES_CONFIRMED', 'RES_PENDING')
+                AND r.check_in &gt; SYSDATE
+            </when>
+            <!-- 이용 완료 -->
+            <when test="status == 'completed'">
+                AND r.status = 'RES_CONFIRMED'
+                AND r.check_out &lt; SYSDATE
+            </when>
+            <!-- 취소/환불 -->
+            <when test="status == 'canceled'">
+                AND r.status IN ('RES_CANCELED', 'RES_REFUNDED')
+            </when>
+            <!-- status 안보내면 전체 -->
+        </choose>
+        ORDER BY r.check_in ASC
+    </select>
+    
+    <!-- 4. 예약 상세 조회 -->
+    <select id="selectBookingDetail" 
+    		resultType="BookingInfoResponse">
+        SELECT
+            r.booking_id AS bookingId,
+            r.booking_num AS bookingNum,
+            u.name AS userName,
+            u.phone AS phone,
+            r.guest_name AS guestName,
+            r.adults,
+            r.children,
+            r.infants,
+            r.total_guest_count AS totalGuestCount,
+            a.name AS accommodationName,
+            a.accommodation_id AS accommodationId,
+            rm.name AS roomName,
+            rm.room_id AS roomId,
+            p.payment_id AS payId,
+            r.amount,
+            p.method AS paymentMethod,
+            p.approved_at AS paidAt,
+            TO_CHAR(r.check_in, 'YYYY-MM-DD') AS checkIn,
+            TO_CHAR(r.check_out, 'YYYY-MM-DD') AS checkOut,
+            r.status,
+            r.created_at AS createdAt,
+            r.updated_at AS updatedAt
+        FROM RESERVATION r
+        JOIN USERS u ON r.user_id = u.user_id
+        JOIN ROOM rm ON r.room_id = rm.room_id
+        JOIN ACCOMMODATION a ON rm.accommodation_id = a.accommodation_id
+        LEFT JOIN PAYMENT p ON r.booking_id = p.booking_id
+        WHERE r.user_id = #{userId} AND r.booking_id = #{bookingId}
+    </select>
+
+    <!-- 5. 리뷰 내역 -->
+    <select id="selectReviews"
+            resultType="com.staylog.staylog.domain.mypage.dto.response.ReviewInfoResponse">
+        <choose>
+            <!-- 작성 가능한 리뷰 (type: availableToWrite)-->
+            <when test="type == 'availableToWrite'">
+                SELECT
+                    b.booking_id AS bookingId,
+                    b.booking_num AS bookingNum,
+                    a.name AS accommodationName,
+                    b.check_in AS checkIn,
+                    b.check_out AS checkOut
+                FROM RESERVATION b
+                JOIN ROOM rm ON b.room_id = rm.room_id
+                JOIN ACCOMMODATION a ON rm.accommodation_id = a.accommodation_id
+                WHERE b.user_id = #{userId}
+                  AND b.status = 'RES_CONFIRMED'
+                  AND b.check_out &lt; SYSDATE
+                  AND b.is_writed = 'N'
+                ORDER BY b.check_out DESC
+            </when>
+
+            <!-- 내가 쓴 리뷰 (type: myWrittenReview) -->
+            <otherwise>
+                SELECT
+                    r.board_id AS reviewId,
+                    b.booking_num AS bookingNum,
+                    a.name AS accommodationName,
+                    r.title AS title,
+                    r.rating AS rating,
+                    r.created_at AS createdAt
+                FROM BOARD r
+                LEFT JOIN RESERVATION b ON r.booking_id = b.booking_id
+                LEFT JOIN ACCOMMODATION a ON r.accommodation_id = a.accommodation_id
+                WHERE r.user_id = #{userId}
+                  AND r.board_type = 'BOARD_REVIEW'
+                ORDER BY r.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+
+
+</mapper>
+

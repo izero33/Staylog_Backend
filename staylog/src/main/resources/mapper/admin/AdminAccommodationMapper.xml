@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staylog.staylog.domain.admin.accommodation.mapper.AdminAccommodationMapper">
+	
+    <!-- 숙소 목록 조회 -->
+    <select id="selectAccommodationList" parameterType="AdminAccommodationSearchRequest" resultType="AdminAccommodationDetailResponse">
+	   	SELECT *
+	   	FROM (
+		   	SELECT t.*, ROWNUM AS rn
+		    FROM (
+		  		SELECT 
+			        a.accommodation_id AS accommodationId,
+			        a.name,
+			        a.ac_type,
+			        ct.code_name AS typeName,
+			        a.region_code,
+			        cr.code_name AS regionName,
+			        a.deleted_yn AS deletedYn,
+			        TO_CHAR(a.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS createdAt
+			    FROM accommodation a
+				LEFT JOIN common_code ct ON ct.code_id = a.ac_type AND ct.use_yn = 'Y'         
+				LEFT JOIN common_code cr ON cr.code_id = a.region_code AND cr.use_yn = 'Y'
+		        <where>
+			        <if test="regionCode != null and regionCode != ''">
+			            	AND a.region_code = #{regionCode}
+			        	</if>
+			            <if test="acType != null and acType != ''">
+			            	AND a.ac_type = #{acType}
+			        	</if>
+			        	<if test="keyword != null and keyword != ''">
+				     	AND a.name LIKE '%' || #{keyword} || '%'
+				    </if>
+			        <if test="deletedYn != null and deletedYn != ''">
+			          	AND a.deleted_yn = #{deletedYn}
+			        </if>
+		        </where>
+				ORDER BY a.deleted_yn ASC, a.created_at DESC
+			) t
+		)
+		WHERE rn BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<!-- 전체 게시글 수 조회 -->
+	<select id="countAccommodationList" parameterType="AdminAccommodationSearchRequest" resultType="int">
+		SELECT COUNT(*)
+	    FROM accommodation a
+        <where>
+            <if test="regionCode != null and regionCode != ''">
+            		AND a.region_code = #{regionCode}
+	        	</if>
+			<if test="acType != null and acType != ''">
+	            	AND a.ac_type = #{acType}
+	        	</if>
+	        <if test="deletedYn != null and deletedYn != ''">
+	           	AND a.deleted_yn = #{deletedYn}
+	        </if>
+	        	<if test="keyword != null and keyword != ''">
+	            AND a.name LIKE '%' || #{keyword} || '%'
+	        </if>
+        </where>
+	</select>
+	
+	<!-- 숙소 상세 조회 -->
+	<select id="selectAccommodationDetail" parameterType="long" resultType="AdminAccommodationDetailResponse">
+		SELECT
+	        a.accommodation_id AS accommodationId,
+	        a.name,
+	        b.avg_rating,
+	        b.reviewCount,
+	        a.ac_type,
+	        ct.code_name AS typeName,
+	        a.deleted_yn AS deletedYn,
+	        a.description,
+	        a.address,
+	        a.region_code,
+	        cr.code_name AS regionName,
+	        a.latitude,
+	        a.longitude,
+			TO_CHAR(a.check_in_time, 'HH24:MI') AS checkInTime,
+			TO_CHAR(a.check_out_time, 'HH24:MI') AS checkOutTime,
+	        TO_CHAR(a.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS createdAt,
+	        TO_CHAR(a.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS updatedAt
+	    FROM accommodation a
+	    LEFT JOIN common_code ct ON ct.code_id = a.ac_type AND ct.use_yn = 'Y'        
+		LEFT JOIN common_code cr ON cr.code_id = a.region_code AND cr.use_yn = 'Y'
+		LEFT JOIN (
+			SELECT accommodation_id, ROUND(AVG(rating), 2) AS avg_rating, COUNT(*) AS reviewCount
+			FROM board 
+			WHERE board_type = 'BOARD_REVIEW' AND deleted = 'N'
+			GROUP BY accommodation_id
+		) b ON b.accommodation_id = a.accommodation_id
+	    WHERE a.accommodation_id = #{accommodationId}
+	</select>
+	
+	<!-- 숙소 전체 수정 -->
+	<update id="updateAccommodation" parameterType="AdminAccommodationRequest">
+	    UPDATE accommodation
+	    SET name = #{name},
+	        ac_type = #{acType},
+	        description = #{description},
+	        address = #{address},
+	        region_code = #{regionCode},
+	        latitude = #{latitude},
+	        longitude = #{longitude},
+	        check_in_time = TO_TIMESTAMP(#{checkInTime}, 'HH24:MI'),
+	        check_out_time = TO_TIMESTAMP(#{checkOutTime}, 'HH24:MI'),
+	        updated_at = SYSTIMESTAMP
+	    WHERE accommodation_id = #{accommodationId}
+	</update>
+	
+	<!-- 숙소 논리 삭제/복원(상태전환) -->
+	<update id="updateAccommodationStatus" parameterType="map">
+	    UPDATE accommodation
+	    SET deleted_yn = #{deletedYn},
+	        updated_at = SYSTIMESTAMP
+	    WHERE accommodation_id = #{accommodationId}
+	</update>
+	
+	<!-- 숙소의 모든 객실 삭제/복원(상태전환) -->
+	<update id="updateAccommodationRoomStatus" parameterType="map">
+	    UPDATE room
+	    SET deleted_yn = #{deletedYn},
+	        updated_at = SYSTIMESTAMP
+	    WHERE accommodation_id = #{accommodationId}
+	</update>
+	
+	<!-- 숙소 등록 -->
+	<insert id="insertAccommodation" parameterType="AdminAccommodationRequest">
+	    INSERT INTO accommodation (
+	        accommodation_id, name, description,
+	        ac_type, region_code, 
+	        address, latitude, longitude,
+	        check_in_time, check_out_time,
+	        created_at
+	    ) VALUES (
+	        #{accommodationId}, #{name}, #{description},
+	        #{acType}, #{regionCode},
+	        #{address}, #{latitude}, #{longitude},
+	        TO_TIMESTAMP(#{checkInTime}, 'HH24:MI'),
+	        TO_TIMESTAMP(#{checkOutTime}, 'HH24:MI'),
+	        SYSTIMESTAMP
+	    )
+	</insert>
+
+</mapper>

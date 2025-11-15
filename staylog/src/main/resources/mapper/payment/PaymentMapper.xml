@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staylog.staylog.domain.payment.mapper.PaymentMapper">
+
+    <!-- Payment Entity ResultMap -->
+    <resultMap id="PaymentResultMap" type="com.staylog.staylog.domain.payment.entity.Payment">
+        <id property="paymentId" column="PAYMENT_ID"/>
+        <result property="status" column="STATUS"/>
+        <result property="amount" column="AMOUNT"/>
+        <result property="method" column="METHOD"/>
+        <result property="bookingId" column="BOOKING_ID"/>
+        <result property="paymentKey" column="PAYMENT_KEY"/>
+        <result property="couponId" column="COUPON_ID"/>
+        <result property="originalAmount" column="ORIGINAL_AMOUNT"/>
+        <result property="discountAmount" column="DISCOUNT_AMOUNT"/>
+        <result property="requestedAt" column="REQUESTED_AT" typeHandler="com.staylog.staylog.global.config.OffsetDateTimeTypeHandler"/>
+        <result property="approvedAt" column="APPROVED_AT" typeHandler="com.staylog.staylog.global.config.OffsetDateTimeTypeHandler"/>
+        <result property="refundedAt" column="REFUNDED_AT" typeHandler="com.staylog.staylog.global.config.OffsetDateTimeTypeHandler"/>
+        <result property="refundId" column="REFUND_ID"/>
+        <result property="refundAmount" column="REFUND_AMOUNT"/>
+        <result property="virtualAccountBank" column="VIRTUAL_ACCOUNT_BANK"/>
+        <result property="virtualAccountNumber" column="VIRTUAL_ACCOUNT_NUMBER"/>
+        <result property="virtualAccountHolder" column="VIRTUAL_ACCOUNT_HOLDER"/>
+        <result property="virtualAccountDueDate" column="VIRTUAL_ACCOUNT_DUE_DATE" typeHandler="com.staylog.staylog.global.config.OffsetDateTimeTypeHandler"/>
+    </resultMap>
+
+
+    <!-- 결제 생성 -->
+    <insert id="insertPayment" parameterType="com.staylog.staylog.domain.payment.entity.Payment">
+        <selectKey keyProperty="paymentId" resultType="Long" order="BEFORE">
+            SELECT SEQ_PAYMENT_ID.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO TEAM404F.PAYMENT (
+            PAYMENT_ID,
+            STATUS,
+            AMOUNT,
+            "METHOD",
+            BOOKING_ID,
+            PAYMENT_KEY,
+            COUPON_ID,
+            ORIGINAL_AMOUNT,
+            DISCOUNT_AMOUNT,
+            REQUESTED_AT
+        )
+        VALUES (
+            #{paymentId},
+            #{status},
+            #{amount},
+            #{method},
+            #{bookingId},
+            #{paymentKey, jdbcType=VARCHAR},
+            #{couponId, jdbcType=NUMERIC},
+            #{originalAmount, jdbcType=NUMERIC},
+            #{discountAmount, jdbcType=NUMERIC},
+            #{requestedAt}
+        )
+    </insert>
+
+    <!-- orderId(bookingNum)로 Payment 조회 -->
+    <select id="findByOrderId" resultMap="PaymentResultMap">
+        SELECT
+        p.payment_id,
+        p.status,
+        p.amount,
+        p.method,
+        p.booking_id,
+        p.payment_key,
+        p.coupon_id,
+        p.original_amount,
+        p.discount_amount,
+        p.requested_at,
+        p.approved_at,
+        p.refunded_at,
+        p.refund_id,
+        p.refund_amount
+        FROM payments p
+        INNER JOIN bookings b ON p.booking_id = b.booking_id
+        WHERE b.booking_num = #{orderId}
+    </select>
+
+    <!-- 결제 조회 (ID) - Payment Entity 반환 -->
+    <select id="findPaymentById" resultMap="PaymentResultMap">
+        SELECT
+            PAYMENT_ID,
+            STATUS,
+            AMOUNT,
+            "METHOD",
+            BOOKING_ID,
+            PAYMENT_KEY,
+            REQUESTED_AT,
+            APPROVED_AT,
+            REFUNDED_AT,
+            REFUND_ID,
+            REFUND_AMOUNT,
+            COUPON_ID,
+            ORIGINAL_AMOUNT,
+            DISCOUNT_AMOUNT
+        FROM TEAM404F.PAYMENT
+        WHERE PAYMENT_ID = #{paymentId}
+    </select>
+
+    <!-- 결제 조회 (bookingId) - Payment Entity 반환 -->
+    <select id="findPaymentByBookingId" resultMap="PaymentResultMap">
+        SELECT * FROM (
+            SELECT
+                PAYMENT_ID,
+                STATUS,
+                AMOUNT,
+                "METHOD",
+                BOOKING_ID,
+                PAYMENT_KEY,
+                REQUESTED_AT,
+                APPROVED_AT,
+                REFUNDED_AT,
+                REFUND_ID,
+                REFUND_AMOUNT,
+                COUPON_ID,
+                ORIGINAL_AMOUNT,
+                DISCOUNT_AMOUNT
+            FROM TEAM404F.PAYMENT
+            WHERE BOOKING_ID = #{bookingId}
+            ORDER BY PAYMENT_ID DESC
+        )
+        WHERE ROWNUM &lt;= 1
+    </select>
+
+    <!-- 결제 조회 (paymentKey) - Payment Entity 반환 -->
+    <select id="findPaymentByPaymentKey" resultMap="PaymentResultMap">
+        SELECT
+            PAYMENT_ID,
+            STATUS,
+            AMOUNT,
+            "METHOD",
+            BOOKING_ID,
+            PAYMENT_KEY,
+            REQUESTED_AT,
+            APPROVED_AT,
+            COUPON_ID,
+            ORIGINAL_AMOUNT,
+            DISCOUNT_AMOUNT
+        FROM TEAM404F.PAYMENT
+        WHERE PAYMENT_KEY = #{paymentKey}
+    </select>
+
+    <!-- 결제 상태 업데이트 (승인 성공 시) -->
+    <update id="updatePaymentApproved">
+        UPDATE TEAM404F.PAYMENT
+        SET
+            STATUS = #{status},
+            PAYMENT_KEY = #{paymentKey},
+            APPROVED_AT = SYSTIMESTAMP
+            <if test="lastTransactionKey != null">
+                , LAST_TRANSACTION_KEY = #{lastTransactionKey}
+            </if>
+        WHERE PAYMENT_ID = #{paymentId}
+    </update>
+
+
+    <!-- 결제 실패 정보 업데이트 -->
+    <update id="updatePaymentFailure">
+        UPDATE TEAM404F.PAYMENT
+        SET STATUS = #{status}
+        WHERE PAYMENT_ID = #{paymentId}
+    </update>
+
+    <!-- 결제 PK로 쿠폰 PK 조회 -->
+    <select id="findCouponIdByPaymentId" parameterType="long" resultType="Long">
+        SELECT coupon_id
+        FROM payment
+        WHERE payment_id = #{paymentId}
+    </select>
+
+    <!-- 가상계좌 정보 업데이트 (Toss 응답에서 받은 정보 저장) -->
+    <update id="updateVirtualAccountInfo">
+        UPDATE TEAM404F.PAYMENT
+        SET VIRTUAL_ACCOUNT_BANK = #{bank, jdbcType=VARCHAR},
+            VIRTUAL_ACCOUNT_NUMBER = #{accountNumber, jdbcType=VARCHAR},
+            VIRTUAL_ACCOUNT_HOLDER = #{customerName, jdbcType=VARCHAR},
+            VIRTUAL_ACCOUNT_DUE_DATE = #{dueDate, jdbcType=TIMESTAMP, typeHandler=com.staylog.staylog.global.config.OffsetDateTimeTypeHandler}
+        WHERE PAYMENT_ID = #{paymentId}
+    </update>
+
+
+    <insert id="insertVirtualAccountPayment" parameterType="map">
+        INSERT INTO PAYMENT (BOOKING_ID, AMOUNT, STATUS, REQUESTED_AT)
+        VALUES (#{bookingId}, #{amount}, 'PAY_READY', SYSTIMESTAMP)
+    </insert>
+
+
+    <!-- 가상계좌 웹훅 입금 시각 처리 -->
+    <update id="updateVirtualAccountDeposit">
+        UPDATE payment
+        SET status = #{code},
+        approved_at = #{approvedAt}
+        WHERE payment_id = #{paymentId}
+    </update>
+
+</mapper>
