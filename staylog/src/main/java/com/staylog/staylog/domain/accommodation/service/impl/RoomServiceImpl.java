@@ -68,8 +68,10 @@ public class RoomServiceImpl implements RoomService{
 	        throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
 	    }
 	    if (days > MAX_DAYS) {
-	        log.warn("날짜 범위가 너무 깁니다. ");
-	        throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
+//	        log.warn("날짜 범위가 너무 깁니다. ");
+//	        throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
+	    	to = from.plusDays(MAX_DAYS-1); 
+	    }
 	    }
 	    
 		
