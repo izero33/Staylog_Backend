@@ -72,7 +72,6 @@ public class RoomServiceImpl implements RoomService{
 //	        throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
 	    	to = from.plusDays(MAX_DAYS-1); 
 	    }
-	    }
 	    
 		
 		//Room 존재 검증 
